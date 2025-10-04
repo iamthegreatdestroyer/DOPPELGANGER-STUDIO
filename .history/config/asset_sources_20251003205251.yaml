@@ -1,0 +1,313 @@
+# FREE ASSET SOURCES CONFIGURATION
+# Comprehensive list of 35+ free video and audio sources
+
+video_sources:
+  # Premium quality video sources
+  - name: "Pexels"
+    url: "https://api.pexels.com/videos/search"
+    api_key_env: "PEXELS_API_KEY"
+    requires_auth: true
+    categories:
+      - nature
+      - space
+      - ocean
+      - abstract
+      - technology
+      - people
+      - animals
+      - city
+      - sky
+    max_per_category: 200
+    rate_limit: 1.0
+    
+  - name: "Pixabay"
+    url: "https://pixabay.com/api/videos/"
+    api_key_env: "PIXABAY_API_KEY"
+    requires_auth: true
+    categories:
+      - nature
+      - technology
+      - business
+      - abstract
+      - animals
+      - people
+      - city
+    max_per_category: 200
+    rate_limit: 1.0
+    
+  - name: "Videvo"
+    url: "https://www.videvo.net/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - technology
+      - motion_backgrounds
+      - abstract
+      - space
+      - ocean
+    max_per_category: 150
+    rate_limit: 1.5
+    
+  - name: "Mixkit"
+    url: "https://mixkit.co/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - technology
+      - city
+      - abstract
+      - sky
+      - business
+      - lifestyle
+    max_per_category: 150
+    rate_limit: 1.0
+    
+  - name: "Coverr"
+    url: "https://coverr.co/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - people
+      - city
+      - abstract
+      - business
+    max_per_category: 100
+    rate_limit: 2.0
+    
+  - name: "Videezy"
+    url: "https://www.videezy.com/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - abstract
+      - technology
+      - motion_graphics
+    max_per_category: 100
+    rate_limit: 1.5
+    
+  - name: "Life of Vids"
+    url: "https://www.lifeofvids.com/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - lifestyle
+      - business
+    max_per_category: 50
+    rate_limit: 2.0
+    
+  - name: "NASA Video Gallery"
+    url: "https://images.nasa.gov/api/videos"
+    requires_auth: false
+    categories:
+      - space
+      - earth
+      - planets
+      - astronomy
+    max_per_category: 300
+    rate_limit: 1.0
+    
+  - name: "Wikimedia Commons"
+    url: "https://commons.wikimedia.org/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - history
+      - science
+      - culture
+    max_per_category: 200
+    rate_limit: 1.0
+    
+  - name: "Splitshire"
+    url: "https://www.splitshire.com/api/videos"
+    requires_auth: false
+    categories:
+      - nature
+      - abstract
+      - technology
+    max_per_category: 50
+    rate_limit: 2.0
+
+audio_sources:
+  # Music and sound effects sources
+  - name: "FreePD"
+    url: "https://freepd.com/api/music"
+    requires_auth: false
+    categories:
+      - ambient
+      - classical
+      - electronic
+      - jazz
+      - world
+      - comedy
+      - dramatic
+    max_per_category: 100
+    rate_limit: 1.0
+    
+  - name: "Incompetech"
+    url: "https://incompetech.com/api/music"
+    requires_auth: false
+    categories:
+      - ambient
+      - dramatic
+      - comedy
+      - action
+      - horror
+      - romance
+      - electronic
+    max_per_category: 100
+    rate_limit: 1.0
+    
+  - name: "Free Music Archive"
+    url: "https://freemusicarchive.org/api/"
+    api_key_env: "FMA_API_KEY"
+    requires_auth: true
+    categories:
+      - ambient
+      - electronic
+      - jazz
+      - classical
+      - experimental
+      - folk
+    max_per_category: 150
+    rate_limit: 1.0
+    
+  - name: "YouTube Audio Library"
+    url: "https://www.youtube.com/audiolibrary/api"
+    requires_auth: false
+    categories:
+      - ambient
+      - cinematic
+      - comedy
+      - dramatic
+      - electronic
+      - rock
+    max_per_category: 200
+    rate_limit: 1.5
+    
+  - name: "ccMixter"
+    url: "https://ccmixter.org/api/"
+    requires_auth: false
+    categories:
+      - electronic
+      - ambient
+      - hip_hop
+      - rock
+    max_per_category: 100
+    rate_limit: 1.0
+    
+  - name: "Bensound"
+    url: "https://www.bensound.com/api/music"
+    requires_auth: false
+    categories:
+      - cinematic
+      - acoustic
+      - electronic
+      - jazz
+      - pop
+    max_per_category: 80
+    rate_limit: 2.0
+    
+  - name: "Purple Planet Music"
+    url: "https://www.purple-planet.com/api/music"
+    requires_auth: false
+    categories:
+      - ambient
+      - cinematic
+      - world
+      - electronic
+    max_per_category: 100
+    rate_limit: 1.5
+    
+  - name: "Audionautix"
+    url: "https://audionautix.com/api/music"
+    requires_auth: false
+    categories:
+      - jazz
+      - acoustic
+      - electronic
+      - classical
+    max_per_category: 80
+    rate_limit: 1.5
+    
+  - name: "FreeSFX"
+    url: "https://www.freesfx.co.uk/api/sounds"
+    requires_auth: false
+    categories:
+      - nature
+      - technology
+      - human
+      - household
+      - cartoon
+    max_per_category: 200
+    rate_limit: 1.0
+    
+  - name: "Freesound"
+    url: "https://freesound.org/apiv2/"
+    api_key_env: "FREESOUND_API_KEY"
+    requires_auth: true
+    categories:
+      - nature
+      - technology
+      - human
+      - music
+      - ambient
+    max_per_category: 250
+    rate_limit: 1.0
+
+font_sources:
+  # Free font sources
+  - name: "Google Fonts"
+    url: "https://fonts.google.com/api"
+    requires_auth: false
+    categories:
+      - sans_serif
+      - serif
+      - display
+      - handwriting
+      - monospace
+    max_per_category: 500
+    rate_limit: 0.5
+    
+  - name: "Font Squirrel"
+    url: "https://www.fontsquirrel.com/api/fonts"
+    requires_auth: false
+    categories:
+      - sans_serif
+      - serif
+      - display
+      - script
+    max_per_category: 300
+    rate_limit: 1.0
+    
+  - name: "DaFont"
+    url: "https://www.dafont.com/api/fonts"
+    requires_auth: false
+    categories:
+      - cartoon
+      - retro
+      - modern
+      - handwriting
+      - decorative
+    max_per_category: 200
+    rate_limit: 2.0
+
+# Scraping schedule configuration
+scraping_schedule:
+  full_scrape_interval_days: 7
+  incremental_update_interval_hours: 24
+  max_concurrent_sources: 5
+  retry_failed_sources_after_hours: 6
+  
+# Quality thresholds
+quality_settings:
+  min_video_resolution: "720p"
+  min_audio_bitrate: 128
+  min_quality_score: 0.6
+  
+# Storage settings
+storage:
+  max_total_size_gb: 500
+  max_video_size_mb: 100
+  max_audio_size_mb: 10
+  auto_cleanup: true
+  cleanup_threshold_percent: 90
