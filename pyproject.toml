@@ -1,0 +1,157 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doppelganger-studio"
+version = "0.3.0"
+description = "AI-powered application that transforms classic TV shows into modern animated reimaginings"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "DOPPELGANGER STUDIO"}
+]
+
+dependencies = [
+    "aiohappyeyeballs>=2.6.1",
+    "aiohttp>=3.12.15",
+    "aiosignal>=1.4.0",
+    "annotated-types>=0.7.0",
+    "anthropic>=0.69.0",
+    "anyio>=4.11.0",
+    "attrs>=25.3.0",
+    "beautifulsoup4>=4.14.2",
+    "black>=25.9.0",
+    "certifi>=2025.10.5",
+    "charset-normalizer>=3.4.3",
+    "click>=8.3.0",
+    "colorama>=0.4.6",
+    "coverage>=7.10.7",
+    "distro>=1.9.0",
+    "dnspython>=2.8.0",
+    "docstring_parser>=0.17.0",
+    "fastapi>=0.118.0",
+    "flake8>=7.3.0",
+    "frozenlist>=1.7.0",
+    "h11>=0.16.0",
+    "httpcore>=1.0.9",
+    "httpx>=0.28.1",
+    "idna>=3.10",
+    "iniconfig>=2.1.0",
+    "jiter>=0.11.0",
+    "mccabe>=0.7.0",
+    "multidict>=6.6.4",
+    "mypy>=1.18.2",
+    "mypy_extensions>=1.1.0",
+    "openai>=2.1.0",
+    "packaging>=25.0",
+    "pathspec>=0.12.1",
+    "pinecone-client>=6.0.0",
+    "pinecone-plugin-interface>=0.0.7",
+    "platformdirs>=4.4.0",
+    "pluggy>=1.6.0",
+    "propcache>=0.4.0",
+    "pycodestyle>=2.14.0",
+    "pydantic>=2.11.10",
+    "pydantic_core>=2.33.2",
+    "pyflakes>=3.4.0",
+    "Pygments>=2.19.2",
+    "pymongo>=4.15.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv>=1.1.1",
+    "pytokens>=0.1.10",
+    "requests>=2.32.5",
+    "soupsieve>=2.8",
+    "starlette>=0.46.0",
+    "typing-extensions>=4.15.0",
+    "urllib3>=2.5.0",
+    "Wikipedia-API>=0.8.1",
+    "yarl>=1.20.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.9.0",
+    "flake8>=7.3.0",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+exclude = ["tests*", "docs*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "performance: Performance tests",
+    "slow: Tests that take a long time to run",
+    "asyncio: Async tests",
+    "requires_db: Tests that require database connection",
+    "requires_api: Tests that require external API access",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | \.venv-1
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = [
+    "tests/",
+    ".venv/",
+    ".venv-1/",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/.venv/*",
+    "*/.venv-1/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
