@@ -60,9 +60,9 @@ class CharacterAnalyzer:
         character_name: str,
         character_description: str,
         show_context: Optional[str] = None
-    ) -> Optional[CharacterAnalysisResponse]:
+    ) -> CharacterAnalysis:
         """
-        Perform deep analysis of a character with validation.
+        Perform deep analysis of a character.
         
         Args:
             character_name: Name of character
@@ -70,7 +70,7 @@ class CharacterAnalyzer:
             show_context: Optional show context for better analysis
             
         Returns:
-            Validated CharacterAnalysisResponse or None if failed
+            CharacterAnalysis with extracted insights
         """
         logger.info(f"Analyzing character: {character_name}")
         
@@ -78,62 +78,28 @@ class CharacterAnalyzer:
             character_name, character_description, show_context
         )
         
-        max_attempts = 3
-        
-        for attempt in range(max_attempts):
-            try:
-                # Call AI
-                raw_response = await self.ai_client.generate(
-                    prompt=prompt,
-                    system_prompt=(
-                        "You are an expert TV character psychologist. "
-                        "Return ONLY valid JSON matching the character "
-                        "analysis schema."
-                    ),
-                    temperature=0.3
-                )
-                
-                # Parse JSON
-                response_json = json.loads(raw_response)
-                
-                # Validate
-                validator = AIResponseValidator()
-                validated = validator.validate_character_analysis(
-                    response_json
-                )
-                
-                if validated:
-                    logger.info(
-                        f"Character analysis validated (attempt {attempt + 1})"
-                    )
-                    return validated
-                else:
-                    logger.warning(
-                        f"Validation failed (attempt {attempt + 1})"
-                    )
-                    if attempt < max_attempts - 1:
-                        # Make prompt stricter
-                        prompt += (
-                            "\n\nIMPORTANT: Your previous response had "
-                            "validation errors. Ensure all required fields "
-                            "are present."
-                        )
-                        
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON parse error: {e}")
-                if attempt < max_attempts - 1:
-                    prompt += (
-                        "\n\nIMPORTANT: Response must be ONLY valid JSON, "
-                        "no markdown or extra text."
-                    )
-                    
-            except Exception as e:
-                logger.error(f"Analysis error: {e}")
-                if attempt == max_attempts - 1:
-                    raise
-        
-        logger.error("Character analysis failed after all retries")
-        return None
+        try:
+            result = await self.ai_client.generate_json(
+                prompt=prompt,
+                system_prompt="You are an expert TV character psychologist.",
+                temperature=0.3  # Lower for more consistent analysis
+            )
+            
+            return CharacterAnalysis(
+                name=character_name,
+                traits=result.get('traits', []),
+                motivations=result.get('motivations', []),
+                relationships=result.get('relationships', {}),
+                signature_behaviors=result.get('behaviors', []),
+                catchphrases=result.get('catchphrases', []),
+                arc_type=result.get('arc_type'),
+                role=result.get('role'),
+                humor_style=result.get('humor_style')
+            )
+            
+        except Exception as e:
+            logger.error(f"Character analysis failed: {e}")
+            raise
     
     def _build_analysis_prompt(
         self,

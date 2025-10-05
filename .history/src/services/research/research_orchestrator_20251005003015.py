@@ -52,8 +52,6 @@ class UnifiedShowResearch:
     rating: Optional[float] = None
     vote_count: Optional[int] = None
     popularity: Optional[float] = None
-    user_reviews: List[Dict] = field(default_factory=list)
-    trivia: List[str] = field(default_factory=list)
     
     # Media
     poster_url: Optional[str] = None
@@ -81,23 +79,14 @@ class ResearchOrchestrator:
     - Fallback mechanisms for failed sources
     """
     
-    def __init__(
-        self,
-        tmdb_api_key: Optional[str] = None,
-        imdb_id: Optional[str] = None,
-        cache_manager=None
-    ):
+    def __init__(self, tmdb_api_key: Optional[str] = None):
         """
         Initialize research orchestrator.
         
         Args:
             tmdb_api_key: Optional TMDB API key for enhanced data
-            imdb_id: Optional IMDB ID if known (e.g., 'tt0043208')
-            cache_manager: DatabaseManager for IMDB caching
         """
         self.tmdb_api_key = tmdb_api_key
-        self.imdb_id = imdb_id
-        self.cache_manager = cache_manager
     
     async def research_show(self, show_title: str) -> UnifiedShowResearch:
         """
@@ -153,41 +142,15 @@ class ResearchOrchestrator:
         # TMDB
         if self.tmdb_api_key:
             try:
-                scraper_args = (self.tmdb_api_key,)
-                async with TMDBResearchScraper(*scraper_args) as tmdb_scraper:
-                    results['tmdb'] = await tmdb_scraper.research_show(
-                        show_title
-                    )
+                async with TMDBResearchScraper(self.tmdb_api_key) as tmdb_scraper:
+                    results['tmdb'] = await tmdb_scraper.research_show(show_title)
                     logger.info("TMDB research successful")
             except Exception as e:
                 logger.error(f"TMDB research failed: {e}")
                 results['tmdb'] = None
         else:
-            logger.warning(
-                "TMDB API key not provided, skipping TMDB research"
-            )
+            logger.warning("TMDB API key not provided, skipping TMDB research")
             results['tmdb'] = None
-        
-        # IMDB
-        if self.cache_manager:
-            try:
-                scraper_args = (self.cache_manager,)
-                async with IMDBResearchScraper(
-                    cache_manager=self.cache_manager
-                ) as imdb_scraper:
-                    results['imdb'] = await imdb_scraper.research_show(
-                        show_title,
-                        imdb_id=self.imdb_id
-                    )
-                    logger.info("IMDB research successful")
-            except Exception as e:
-                logger.error(f"IMDB research failed: {e}")
-                results['imdb'] = None
-        else:
-            logger.warning(
-                "Cache manager not provided, skipping IMDB research"
-            )
-            results['imdb'] = None
         
         return results
     
@@ -199,7 +162,6 @@ class ResearchOrchestrator:
         """Merge data from multiple sources intelligently."""
         wiki_data: Optional[WikipediaShowData] = results.get('wikipedia')
         tmdb_data: Optional[TMDBShowData] = results.get('tmdb')
-        imdb_data: Optional[IMDBShowData] = results.get('imdb')
         
         # Determine primary title
         title = self._merge_titles(show_title, wiki_data, tmdb_data)
@@ -221,14 +183,10 @@ class ResearchOrchestrator:
             main_characters=wiki_data.main_characters if wiki_data else [],
             cast=self._merge_cast(wiki_data, tmdb_data),
             cultural_impact=wiki_data.cultural_impact if wiki_data else None,
-            critical_reception=(
-                wiki_data.critical_reception if wiki_data else None
-            ),
-            rating=self._merge_rating(tmdb_data, imdb_data),
-            vote_count=self._merge_vote_count(tmdb_data, imdb_data),
+            critical_reception=wiki_data.critical_reception if wiki_data else None,
+            rating=tmdb_data.vote_average if tmdb_data else None,
+            vote_count=tmdb_data.vote_count if tmdb_data else None,
             popularity=tmdb_data.popularity if tmdb_data else None,
-            user_reviews=imdb_data.reviews if imdb_data else [],
-            trivia=imdb_data.trivia if imdb_data else [],
             poster_url=tmdb_data.poster_path if tmdb_data else None,
             backdrop_url=tmdb_data.backdrop_path if tmdb_data else None,
             sources=self._get_successful_sources(results),
@@ -367,30 +325,6 @@ class ResearchOrchestrator:
         if wiki_data and wiki_data.cast:
             return wiki_data.cast
         return []
-    
-    def _merge_rating(
-        self,
-        tmdb_data: Optional[TMDBShowData],
-        imdb_data: Optional[IMDBShowData]
-    ) -> Optional[float]:
-        """Merge ratings, preferring IMDB (more user-focused)."""
-        if imdb_data and imdb_data.rating:
-            return imdb_data.rating
-        if tmdb_data and tmdb_data.vote_average:
-            return tmdb_data.vote_average
-        return None
-    
-    def _merge_vote_count(
-        self,
-        tmdb_data: Optional[TMDBShowData],
-        imdb_data: Optional[IMDBShowData]
-    ) -> Optional[int]:
-        """Merge vote counts."""
-        if imdb_data and imdb_data.vote_count:
-            return imdb_data.vote_count
-        if tmdb_data and tmdb_data.vote_count:
-            return tmdb_data.vote_count
-        return None
     
     def _get_successful_sources(
         self,

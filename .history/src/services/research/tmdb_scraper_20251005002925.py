@@ -115,6 +115,9 @@ class TMDBResearchScraper:
     
     async def _search_show(self, query: str) -> Optional[int]:
         """Search for a TV show and return its TMDB ID."""
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
         url = f"{self.BASE_URL}/search/tv"
         params = {
             'api_key': self.api_key,
@@ -122,135 +125,53 @@ class TMDBResearchScraper:
             'page': 1
         }
         
-        data = await self._make_request(url, params)
-        results = data.get('results', [])
-        
-        if not results:
-            return None
-        
-        # Return first result's ID
-        return results[0]['id']
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                logger.error(f"TMDB search failed: {response.status}")
+                return None
+            
+            data = await response.json()
+            results = data.get('results', [])
+            
+            if not results:
+                return None
+            
+            # Return first result's ID
+            return results[0]['id']
     
     async def _get_show_details(self, show_id: int) -> Dict:
         """Get detailed information about a show."""
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
         url = f"{self.BASE_URL}/tv/{show_id}"
         params = {
             'api_key': self.api_key,
             'append_to_response': 'content_ratings,external_ids'
         }
         
-        return await self._make_request(url, params)
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                raise ValueError(
+                    f"Failed to get show details: {response.status}"
+                )
+            
+            return await response.json()
     
     async def _get_credits(self, show_id: int) -> Dict:
         """Get cast and crew information."""
-        url = f"{self.BASE_URL}/tv/{show_id}/credits"
-        params = {'api_key': self.api_key}
-        
-        try:
-            return await self._make_request(url, params)
-        except Exception as e:
-            logger.warning(f"Failed to get credits: {e}")
-            return {'cast': [], 'crew': []}
-    
-    async def _check_rate_limit(self) -> bool:
-        """
-        Check if we're within rate limits using Redis.
-        
-        Returns:
-            True if request can proceed, False if rate limited
-        """
-        if not self.redis:
-            return True  # No Redis = no rate limiting (fallback)
-        
-        key = "ratelimit:tmdb:requests"
-        now = datetime.now().timestamp()
-        window_start = now - self.RATE_LIMIT_WINDOW
-        
-        try:
-            # Remove old entries outside window
-            await self.redis.zremrangebyscore(key, 0, window_start)
-            
-            # Count requests in current window
-            count = await self.redis.zcard(key)
-            
-            if count >= self.RATE_LIMIT_MAX:
-                # Get oldest entry in window
-                oldest = await self.redis.zrange(key, 0, 0, withscores=True)
-                if oldest:
-                    wait_time = (
-                        oldest[0][1] + self.RATE_LIMIT_WINDOW - now
-                    )
-                    logger.warning(
-                        f"TMDB rate limit reached, waiting {wait_time:.2f}s"
-                    )
-                    await asyncio.sleep(wait_time)
-                    # Recursive check after waiting
-                    return await self._check_rate_limit()
-            
-            # Add current request
-            await self.redis.zadd(key, {str(now): now})
-            await self.redis.expire(key, self.RATE_LIMIT_WINDOW * 2)
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Rate limit check failed: {e}")
-            return True  # Fail open
-    
-    async def _make_request(self, url: str, params: Dict) -> Dict:
-        """
-        Make API request with rate limiting and retry logic.
-        
-        Args:
-            url: API endpoint
-            params: Query parameters
-            
-        Returns:
-            JSON response
-            
-        Raises:
-            Exception if request fails after retries
-        """
         if not self.session:
             raise RuntimeError("Session not initialized")
         
-        max_retries = 3
-        retry_delay = 1.0  # Initial delay in seconds
+        url = f"{self.BASE_URL}/tv/{show_id}/credits"
+        params = {'api_key': self.api_key}
         
-        for attempt in range(max_retries):
-            # Check rate limit
-            await self._check_rate_limit()
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                logger.warning(f"Failed to get credits: {response.status}")
+                return {'cast': [], 'crew': []}
             
-            try:
-                async with self.session.get(url, params=params) as response:
-                    if response.status == 429:
-                        # Rate limited - exponential backoff
-                        wait_time = retry_delay * (2 ** attempt)
-                        logger.warning(
-                            f"TMDB rate limited, waiting {wait_time}s"
-                        )
-                        await asyncio.sleep(wait_time)
-                        continue
-                    
-                    if response.status == 200:
-                        return await response.json()
-                    
-                    # Other errors
-                    logger.error(f"TMDB API error {response.status}")
-                    if attempt == max_retries - 1:
-                        raise Exception(
-                            f"TMDB API failed: {response.status}"
-                        )
-                    
-                    await asyncio.sleep(retry_delay)
-                    
-            except asyncio.TimeoutError:
-                logger.error(f"TMDB timeout (attempt {attempt + 1})")
-                if attempt == max_retries - 1:
-                    raise
-                await asyncio.sleep(retry_delay)
-        
-        raise Exception("TMDB API request failed after retries")
+            return await response.json()
     
     def _build_show_data(self, details: Dict, credits: Dict) -> TMDBShowData:
         """Build TMDBShowData from API responses."""

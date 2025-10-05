@@ -252,6 +252,66 @@ class TMDBResearchScraper:
         
         raise Exception("TMDB API request failed after retries")
     
+    async def _search_show_old(self, query: str) -> Optional[int]:
+        """Search for a TV show and return its TMDB ID."""
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
+        url = f"{self.BASE_URL}/search/tv"
+        params = {
+            'api_key': self.api_key,
+            'query': query,
+            'page': 1
+        }
+        
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                logger.error(f"TMDB search failed: {response.status}")
+                return None
+            
+            data = await response.json()
+            results = data.get('results', [])
+            
+            if not results:
+                return None
+            
+            # Return first result's ID
+            return results[0]['id']
+    
+    async def _get_show_details(self, show_id: int) -> Dict:
+        """Get detailed information about a show."""
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
+        url = f"{self.BASE_URL}/tv/{show_id}"
+        params = {
+            'api_key': self.api_key,
+            'append_to_response': 'content_ratings,external_ids'
+        }
+        
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                raise ValueError(
+                    f"Failed to get show details: {response.status}"
+                )
+            
+            return await response.json()
+    
+    async def _get_credits(self, show_id: int) -> Dict:
+        """Get cast and crew information."""
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
+        url = f"{self.BASE_URL}/tv/{show_id}/credits"
+        params = {'api_key': self.api_key}
+        
+        async with self.session.get(url, params=params) as response:
+            if response.status != 200:
+                logger.warning(f"Failed to get credits: {response.status}")
+                return {'cast': [], 'crew': []}
+            
+            return await response.json()
+    
     def _build_show_data(self, details: Dict, credits: Dict) -> TMDBShowData:
         """Build TMDBShowData from API responses."""
         return TMDBShowData(

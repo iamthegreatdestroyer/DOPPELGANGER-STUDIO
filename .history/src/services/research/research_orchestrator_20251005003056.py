@@ -368,30 +368,6 @@ class ResearchOrchestrator:
             return wiki_data.cast
         return []
     
-    def _merge_rating(
-        self,
-        tmdb_data: Optional[TMDBShowData],
-        imdb_data: Optional[IMDBShowData]
-    ) -> Optional[float]:
-        """Merge ratings, preferring IMDB (more user-focused)."""
-        if imdb_data and imdb_data.rating:
-            return imdb_data.rating
-        if tmdb_data and tmdb_data.vote_average:
-            return tmdb_data.vote_average
-        return None
-    
-    def _merge_vote_count(
-        self,
-        tmdb_data: Optional[TMDBShowData],
-        imdb_data: Optional[IMDBShowData]
-    ) -> Optional[int]:
-        """Merge vote counts."""
-        if imdb_data and imdb_data.vote_count:
-            return imdb_data.vote_count
-        if tmdb_data and tmdb_data.vote_count:
-            return tmdb_data.vote_count
-        return None
-    
     def _get_successful_sources(
         self,
         results: Dict[str, Optional[object]]
