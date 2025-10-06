@@ -165,8 +165,8 @@ class TestTransformationEngineBasics:
         )
         
         char_transform = rules.character_transformations[0]
-        assert char_transform.original_name == 'Lucy Ricardo'
-        assert char_transform.modern_occupation == 'Social media content creator'
+        assert char_transform.original_character == 'Lucy Ricardo'
+        assert char_transform.occupation_update == 'Social media content creator'
     
     @pytest.mark.asyncio
     async def test_cultural_updates(
@@ -273,23 +273,31 @@ class TestTransformationCaching:
         """Test cache retrieval on cache hit."""
         from datetime import datetime, timedelta
         
-        # Match the simplified cache format used by _serialize_rules/_deserialize_rules
         cached_rules = {
             'show_title': 'I Love Lucy 2025',
-            'modern_premise': 'Cached modern premise',
             'setting_transformation': {
-                'original_era': '1950s',
-                'modern_location': 'Brooklyn loft'
+                'original_setting': '1950s NYC apartment',
+                'modern_equivalent': '2025 Brooklyn loft',
+                'justification': 'Cached justification',
+                'cultural_references': []
             },
             'character_transformations': [
                 {
-                    'original_name': 'Lucy',
-                    'modern_occupation': 'Content creator',
-                    'motivation_shift': 'Wants viral fame instead of TV fame'
+                    'original_character': 'Lucy',
+                    'original_archetype': 'Housewife',
+                    'modern_archetype': 'Influencer',
+                    'occupation_update': 'Content creator',
+                    'motivation_update': 'Wants viral fame',
+                    'technology_integration': []
                 }
             ],
-            'cultural_updates': ['TV to streaming', 'Phone to smartphone'],
-            'technology_opportunities': ['Social media', 'Smart home']
+            'humor_transformation': {
+                'original_humor_type': 'Physical comedy',
+                'modern_humor_type': 'Cringe comedy',
+                'example_transformations': []
+            },
+            'cultural_updates': [],
+            'technology_opportunities': []
         }
         
         mock_database.mongodb['ai_analysis'].find_one.return_value = {

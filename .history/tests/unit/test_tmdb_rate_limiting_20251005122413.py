@@ -72,25 +72,21 @@ async def test_rate_limiter_fallback_without_redis():
 @pytest.mark.asyncio
 async def test_make_request_handles_429():
     """Test exponential backoff on 429 status."""
-    from unittest.mock import Mock, MagicMock
-    
     mock_redis = AsyncMock()
     mock_redis.zcard.return_value = 0
     
-    mock_response = MagicMock()
+    mock_response = AsyncMock()
     mock_response.status = 429
     
     # Create proper async context manager
     class MockContextManager:
         async def __aenter__(self):
             return mock_response
-        
         async def __aexit__(self, *args):
             pass
     
-    # Use regular Mock for session, not AsyncMock
-    mock_session = Mock()
-    mock_session.get = Mock(return_value=MockContextManager())
+    mock_session = AsyncMock()
+    mock_session.get.return_value = MockContextManager()
     
     scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
     scraper.session = mock_session
@@ -105,26 +101,22 @@ async def test_make_request_handles_429():
 @pytest.mark.asyncio
 async def test_make_request_success():
     """Test successful API request."""
-    from unittest.mock import Mock, MagicMock
-    
     mock_redis = AsyncMock()
     mock_redis.zcard.return_value = 0
     
-    mock_response = MagicMock()
+    mock_response = AsyncMock()
     mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={'data': 'test'})
+    mock_response.json.return_value = {'data': 'test'}
     
     # Create proper async context manager
     class MockContextManager:
         async def __aenter__(self):
             return mock_response
-        
         async def __aexit__(self, *args):
             pass
     
-    # Use regular Mock for session, not AsyncMock
-    mock_session = Mock()
-    mock_session.get = Mock(return_value=MockContextManager())
+    mock_session = AsyncMock()
+    mock_session.get.return_value = MockContextManager()
     
     scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
     scraper.session = mock_session
@@ -138,28 +130,23 @@ async def test_make_request_success():
 @pytest.mark.asyncio
 async def test_make_request_timeout_retry():
     """Test timeout triggers retry."""
-    from unittest.mock import Mock, MagicMock
-    import asyncio
-    
     mock_redis = AsyncMock()
     mock_redis.zcard.return_value = 0
     
-    # Use regular Mock for session
-    mock_session = Mock()
+    mock_session = AsyncMock()
     # First two attempts timeout, third succeeds
-    mock_response = MagicMock()
+    mock_response = AsyncMock()
     mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={'data': 'test'})
+    mock_response.json.return_value = {'data': 'test'}
     
     side_effects = [
-        asyncio.TimeoutError(),
-        asyncio.TimeoutError(),
+        Exception("Timeout"),
+        Exception("Timeout"),
     ]
     
     call_count = [0]
     
-    def get_side_effect(*args, **kwargs):
-        """Side effect function - must be regular function not async."""
+    async def get_side_effect(*args, **kwargs):
         call_count[0] += 1
         if call_count[0] <= 2:
             raise side_effects[call_count[0] - 1]
@@ -167,7 +154,6 @@ async def test_make_request_timeout_retry():
         class MockContext:
             async def __aenter__(self):
                 return mock_response
-            
             async def __aexit__(self, *args):
                 pass
         

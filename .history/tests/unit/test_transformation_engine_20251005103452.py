@@ -166,7 +166,8 @@ class TestTransformationEngineBasics:
         
         char_transform = rules.character_transformations[0]
         assert char_transform.original_name == 'Lucy Ricardo'
-        assert char_transform.modern_occupation == 'Social media content creator'
+        assert char_transform.modern_occupation == 'Content creator'
+        assert 'Ambitious' in char_transform.personality_retention
     
     @pytest.mark.asyncio
     async def test_cultural_updates(
@@ -271,31 +272,26 @@ class TestTransformationCaching:
         sample_character_analysis, sample_narrative_analysis
     ):
         """Test cache retrieval on cache hit."""
-        from datetime import datetime, timedelta
-        
-        # Match the simplified cache format used by _serialize_rules/_deserialize_rules
         cached_rules = {
             'show_title': 'I Love Lucy 2025',
-            'modern_premise': 'Cached modern premise',
+            'modern_premise': 'Cached premise',
             'setting_transformation': {
                 'original_era': '1950s',
-                'modern_location': 'Brooklyn loft'
+                'modern_era': '2025',
+                'original_location': 'NYC',
+                'modern_location': 'Brooklyn',
+                'justification': 'Cached'
             },
-            'character_transformations': [
-                {
-                    'original_name': 'Lucy',
-                    'modern_occupation': 'Content creator',
-                    'motivation_shift': 'Wants viral fame instead of TV fame'
-                }
-            ],
-            'cultural_updates': ['TV to streaming', 'Phone to smartphone'],
-            'technology_opportunities': ['Social media', 'Smart home']
+            'character_transformations': [],
+            'humor_transformation': {
+                'original_style': 'Physical',
+                'modern_style': 'Cringe'
+            },
+            'cultural_updates': [],
+            'technology_opportunities': []
         }
         
-        mock_database.mongodb['ai_analysis'].find_one.return_value = {
-            'output_data': cached_rules,
-            'expires_at': datetime.now() + timedelta(days=1)
-        }
+        mock_database.mongodb['ai_analysis'].find_one.return_value = cached_rules
         
         engine = TransformationEngine(
             claude_client=mock_claude_client,
@@ -308,6 +304,7 @@ class TestTransformationCaching:
         )
         
         assert rules is not None
+        assert rules.modern_premise == 'Cached premise'
         assert not mock_claude_client.generate.called
 
 

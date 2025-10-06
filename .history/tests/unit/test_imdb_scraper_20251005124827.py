@@ -66,7 +66,7 @@ async def test_robots_txt_allowed():
 
 @pytest.mark.asyncio
 async def test_fetch_page_handles_429():
-    """Test that HTTP 429 (rate limited) returns None gracefully."""
+    """Test that HTTP 429 (rate limited) raises exception."""
     scraper = IMDBResearchScraper()
     
     # Mock robots.txt to allow request
@@ -88,9 +88,8 @@ async def test_fetch_page_handles_429():
     
     scraper.session = mock_session
     
-    # Should return None (graceful failure), not raise exception
-    result = await scraper._fetch_page("http://test.com")
-    assert result is None
+    with pytest.raises(Exception, match="Rate limited by IMDB"):
+        await scraper._fetch_page("http://test.com")
 
 
 @pytest.mark.asyncio

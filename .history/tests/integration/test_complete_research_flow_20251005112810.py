@@ -30,7 +30,6 @@ async def test_research_orchestrator_all_sources():
     # Mock successful research from all sources
     mock_wiki_data = WikipediaShowData(
         title="I Love Lucy",
-        years="1951-1957",
         source_url="http://test",
         plot_summary="Classic sitcom",
         setting="1950s New York",
@@ -167,4 +166,4 @@ async def test_research_orchestrator_completeness_scoring():
     )
     
     completeness_low = orchestrator._calculate_completeness(incomplete_result)
-    assert completeness_low < 0.35  # Adjusted threshold to account for calculation
+    assert completeness_low < 0.3

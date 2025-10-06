@@ -139,7 +139,6 @@ async def test_make_request_success():
 async def test_make_request_timeout_retry():
     """Test timeout triggers retry."""
     from unittest.mock import Mock, MagicMock
-    import asyncio
     
     mock_redis = AsyncMock()
     mock_redis.zcard.return_value = 0
@@ -152,14 +151,13 @@ async def test_make_request_timeout_retry():
     mock_response.json = AsyncMock(return_value={'data': 'test'})
     
     side_effects = [
-        asyncio.TimeoutError(),
-        asyncio.TimeoutError(),
+        Exception("Timeout"),
+        Exception("Timeout"),
     ]
     
     call_count = [0]
     
-    def get_side_effect(*args, **kwargs):
-        """Side effect function - must be regular function not async."""
+    async def get_side_effect(*args, **kwargs):
         call_count[0] += 1
         if call_count[0] <= 2:
             raise side_effects[call_count[0] - 1]
@@ -167,7 +165,6 @@ async def test_make_request_timeout_retry():
         class MockContext:
             async def __aenter__(self):
                 return mock_response
-            
             async def __aexit__(self, *args):
                 pass
         

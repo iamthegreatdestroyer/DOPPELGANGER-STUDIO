@@ -210,18 +210,8 @@ class TestNarrativeAnalyzerCaching:
             'recurring_devices': [],
             'pacing_notes': 'Cached pacing',
             'unique_signatures': [],
-            'episode_structure': {
-                'total_runtime': 22,
-                'act_count': 3,
-                'act_lengths': [7, 10, 5],
-                'commercial_breaks': 2,
-                'opening_length': 90,
-                'closing_length': 30
-            },
-            'a_plot_pattern': 'Cached A-plot',
-            'b_plot_patterns': ['Cached B-plot'],
-            'cliffhanger_usage': 'Rarely',
-            'seasonal_arc': None,
+            'episode_structure': None,
+            'b_plot_patterns': [],
             'confidence_score': 0.9
         }
         

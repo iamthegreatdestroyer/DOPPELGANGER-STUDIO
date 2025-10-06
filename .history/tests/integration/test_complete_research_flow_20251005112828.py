@@ -167,4 +167,4 @@ async def test_research_orchestrator_completeness_scoring():
     )
     
     completeness_low = orchestrator._calculate_completeness(incomplete_result)
-    assert completeness_low < 0.35  # Adjusted threshold to account for calculation
+    assert completeness_low < 0.3

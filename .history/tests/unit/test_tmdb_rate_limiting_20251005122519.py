@@ -139,7 +139,6 @@ async def test_make_request_success():
 async def test_make_request_timeout_retry():
     """Test timeout triggers retry."""
     from unittest.mock import Mock, MagicMock
-    import asyncio
     
     mock_redis = AsyncMock()
     mock_redis.zcard.return_value = 0
@@ -152,8 +151,8 @@ async def test_make_request_timeout_retry():
     mock_response.json = AsyncMock(return_value={'data': 'test'})
     
     side_effects = [
-        asyncio.TimeoutError(),
-        asyncio.TimeoutError(),
+        Exception("Timeout"),
+        Exception("Timeout"),
     ]
     
     call_count = [0]

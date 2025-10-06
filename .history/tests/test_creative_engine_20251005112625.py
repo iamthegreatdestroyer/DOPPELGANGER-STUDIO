@@ -247,13 +247,11 @@ class TestCharacterAnalyzer:
             show_context="1950s sitcom"
         )
         
-        assert isinstance(analysis, CharacterAnalysisResponse)
-        assert analysis.character_name == "Test Character"
-        assert len(analysis.core_traits) == 3
-        assert any(t.trait == 'Ambitious' for t in analysis.core_traits)
-        assert len(analysis.relationships) == 1
-        assert analysis.relationships[0].character_name == 'Ricky'
-        assert analysis.relationships[0].relationship_type == 'husband'
+        assert isinstance(analysis, CharacterAnalysis)
+        assert analysis.name == "Lucy Ricardo"
+        assert 'ambitious' in analysis.traits
+        assert 'Ricky' in analysis.relationships
+        assert analysis.humor_style == 'physical comedy'
     
     @pytest.mark.asyncio
     async def test_analyze_without_context(self, mock_ai_client):
@@ -265,10 +263,8 @@ class TestCharacterAnalyzer:
             character_description="Test description"
         )
         
-        assert isinstance(analysis, CharacterAnalysisResponse)
-        assert analysis.character_name == "Test Character"
-        assert isinstance(analysis.core_traits, list)
-        assert len(analysis.core_traits) >= 3
+        assert analysis.name == "Test Character"
+        assert isinstance(analysis.traits, list)
 
 
 if __name__ == "__main__":

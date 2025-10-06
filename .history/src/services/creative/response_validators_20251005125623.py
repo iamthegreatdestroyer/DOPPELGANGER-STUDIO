@@ -1,5 +1,14 @@
 """
-AI Response Validators - Pydantic schemas for structured AI outputs.
+AI Response Validators - Pydantic sche    comedic_elements: List[str] = Field(default_factory=list, max_length=10)
+    modern_parallels: List[str] = Field(default_factory=list, max_length=5)
+
+    @field_validator('core_traits')
+    @classmethod
+    def validate_traits(cls, v):
+        """Ensure at least 3 traits provided."""
+        if len(v) < 3:
+            raise ValueError("Must provide at least 3 core traits")
+        return vtructured AI outputs.
 
 Validates that Claude and GPT-4 return properly structured JSON responses
 for character analysis, narrative analysis, and transformations.
@@ -8,7 +17,7 @@ Copyright (c) 2025. All Rights Reserved. Patent Pending.
 """
 
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, validator, field_validator
+from pydantic import BaseModel, Field, field_validator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,7 +29,7 @@ class CharacterTrait(BaseModel):
     """Individual character trait."""
     trait: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=10, max_length=500)
-    examples: List[str] = Field(default_factory=list, max_length=5)
+    examples: List[str] = Field(default_factory=list, max_items=5)
 
 
 class CharacterRelationship(BaseModel):
@@ -28,7 +37,7 @@ class CharacterRelationship(BaseModel):
     character_name: str
     relationship_type: str  # e.g., "spouse", "friend", "rival"
     description: str
-    key_moments: List[str] = Field(default_factory=list, max_length=3)
+    key_moments: List[str] = Field(default_factory=list, max_items=3)
 
 
 class CharacterAnalysisResponse(BaseModel):
@@ -41,11 +50,10 @@ class CharacterAnalysisResponse(BaseModel):
         default_factory=list
     )
     character_arc: Optional[str] = None
-    comedic_elements: List[str] = Field(default_factory=list, max_length=10)
-    modern_parallels: List[str] = Field(default_factory=list, max_length=5)
+    comedic_elements: List[str] = Field(default_factory=list, max_items=10)
+    modern_parallels: List[str] = Field(default_factory=list, max_items=5)
 
-    @field_validator('core_traits')
-    @classmethod
+    @validator('core_traits')
     def validate_traits(cls, v):
         """Ensure at least 3 traits provided."""
         if len(v) < 3:
@@ -67,7 +75,7 @@ class RecurringPlotDevice(BaseModel):
     device_name: str
     description: str
     frequency: str  # "every episode", "occasional", "rare"
-    examples: List[str] = Field(default_factory=list, max_length=3)
+    examples: List[str] = Field(default_factory=list, max_items=3)
 
 
 class NarrativeAnalysisResponse(BaseModel):
@@ -81,7 +89,7 @@ class NarrativeAnalysisResponse(BaseModel):
     closing_convention: Optional[str] = None
     b_plot_patterns: List[str] = Field(default_factory=list)
     pacing_notes: Optional[str] = None
-    unique_signatures: List[str] = Field(default_factory=list, max_length=5)
+    unique_signatures: List[str] = Field(default_factory=list, max_items=5)
 
 
 # Transformation Rules Schemas
@@ -92,7 +100,7 @@ class SettingTransformation(BaseModel):
     modern_equivalent: str
     justification: str
     cultural_references: List[str] = Field(
-        default_factory=list, max_length=5
+        default_factory=list, max_items=5
     )
 
 
@@ -112,7 +120,7 @@ class HumorTransformation(BaseModel):
     modern_humor_type: str
     example_transformations: List[Dict[str, str]] = Field(
         default_factory=list,
-        max_length=5
+        max_items=5
     )
 
 

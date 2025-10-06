@@ -102,17 +102,6 @@ def mock_gpt_client():
 
 
 @pytest.fixture
-def dialogue_generator(mock_claude_client, mock_gpt_client):
-    """Provide a DialogueGenerator instance with mocked AI clients."""
-    from src.services.creative.dialogue_generator import DialogueGenerator
-    return DialogueGenerator(
-        claude_client=mock_claude_client,
-        gpt_client=mock_gpt_client,
-        database_manager=None
-    )
-
-
-@pytest.fixture
 def sample_character_data():
     """Provide sample character data for testing."""
     return {

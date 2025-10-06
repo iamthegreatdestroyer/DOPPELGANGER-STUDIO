@@ -14,9 +14,9 @@ from src.services.creative.claude_client import ClaudeClient, AIResponse
 from src.services.creative.openai_client import OpenAIClient
 from src.services.creative.ai_orchestrator import AIOrchestrator
 from src.services.creative.character_analyzer import (
-    CharacterAnalyzer
+    CharacterAnalyzer,
+    CharacterAnalysis
 )
-from src.services.creative.response_validators import CharacterAnalysisResponse
 
 
 class TestClaudeClient:
@@ -200,40 +200,16 @@ class TestCharacterAnalyzer:
     def mock_ai_client(self):
         """Create mock AI client."""
         client = AsyncMock()  # Use AsyncMock instead of Mock
-        # CharacterAnalyzer calls generate() which should return a JSON string
-        client.generate.return_value = json.dumps({
-            'character_name': 'Test Character',
-            'core_traits': [
-                {
-                    'trait': 'Ambitious',
-                    'description': 'Always trying to achieve goals',
-                    'examples': ['Example 1', 'Example 2']
-                },
-                {
-                    'trait': 'Scheming',
-                    'description': 'Makes elaborate plans',
-                    'examples': ['Example A', 'Example B']
-                },
-                {
-                    'trait': 'Lovable',
-                    'description': 'Endearing despite flaws',
-                    'examples': ['Example X', 'Example Y']
-                }
-            ],
-            'speech_patterns': ['Fast talking', 'Whining'],
+        client.generate_json.return_value = {
+            'traits': ['ambitious', 'scheming', 'lovable'],
+            'motivations': ['fame', 'success'],
+            'relationships': {'Ricky': 'husband'},
+            'behaviors': ['harebrained schemes'],
             'catchphrases': ['Ricky!'],
-            'relationships': [
-                {
-                    'character_name': 'Ricky',
-                    'relationship_type': 'husband',
-                    'description': 'Supportive but exasperated husband',
-                    'key_moments': ['Meeting', 'Marriage', 'Career support']
-                }
-            ],
-            'character_arc': 'episodic',
-            'comedic_elements': ['physical comedy', 'facial expressions'],
-            'modern_parallels': ['Influencer wannabe']
-        })
+            'arc_type': 'episodic',
+            'role': 'protagonist',
+            'humor_style': 'physical comedy'
+        }
         return client
     
     @pytest.mark.asyncio
@@ -247,13 +223,11 @@ class TestCharacterAnalyzer:
             show_context="1950s sitcom"
         )
         
-        assert isinstance(analysis, CharacterAnalysisResponse)
-        assert analysis.character_name == "Test Character"
-        assert len(analysis.core_traits) == 3
-        assert any(t.trait == 'Ambitious' for t in analysis.core_traits)
-        assert len(analysis.relationships) == 1
-        assert analysis.relationships[0].character_name == 'Ricky'
-        assert analysis.relationships[0].relationship_type == 'husband'
+        assert isinstance(analysis, CharacterAnalysis)
+        assert analysis.name == "Lucy Ricardo"
+        assert 'ambitious' in analysis.traits
+        assert 'Ricky' in analysis.relationships
+        assert analysis.humor_style == 'physical comedy'
     
     @pytest.mark.asyncio
     async def test_analyze_without_context(self, mock_ai_client):
@@ -265,10 +239,8 @@ class TestCharacterAnalyzer:
             character_description="Test description"
         )
         
-        assert isinstance(analysis, CharacterAnalysisResponse)
-        assert analysis.character_name == "Test Character"
-        assert isinstance(analysis.core_traits, list)
-        assert len(analysis.core_traits) >= 3
+        assert analysis.name == "Test Character"
+        assert isinstance(analysis.traits, list)
 
 
 if __name__ == "__main__":

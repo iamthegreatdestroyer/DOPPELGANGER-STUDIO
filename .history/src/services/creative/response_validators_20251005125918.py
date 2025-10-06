@@ -44,8 +44,7 @@ class CharacterAnalysisResponse(BaseModel):
     comedic_elements: List[str] = Field(default_factory=list, max_length=10)
     modern_parallels: List[str] = Field(default_factory=list, max_length=5)
 
-    @field_validator('core_traits')
-    @classmethod
+    @validator('core_traits')
     def validate_traits(cls, v):
         """Ensure at least 3 traits provided."""
         if len(v) < 3:
