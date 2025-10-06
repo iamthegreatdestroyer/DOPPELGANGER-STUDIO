@@ -1,0 +1,933 @@
+"""
+Copyright (c) 2025 DOPPELGANGER STUDIO. All Rights Reserved.
+
+Comprehensive unit tests for ScriptGenerator orchestrator.
+
+Tests component coordination, scene generation, refinement loop,
+export formats, and data model serialization.
+"""
+
+import pytest
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from datetime import datetime
+
+from src.services.creative.script_generator import ScriptGenerator
+from src.services.creative.script_models import (
+    SceneScript,
+    RefinementIteration,
+    FullScript,
+    ScriptFormat,
+)
+from src.services.creative.character_voice_profiles import (
+    CharacterVoiceProfile,
+    DialogueLine,
+    SceneDialogue,
+)
+from src.services.creative.stage_direction_models import (
+    StageDirection,
+    SceneStageDirections,
+)
+from src.services.creative.joke_models import (
+    JokeStructure,
+    JokeType,
+    ComedyTimingAnalysis,
+    OptimizedScriptComedy,
+)
+from src.services.creative.validation_models import (
+    ValidationIssue,
+    ValidationSeverity,
+    ValidationCategory,
+    CharacterConsistencyScore,
+    ComedyDistributionAnalysis,
+    ProductionComplexityAssessment,
+    PlotCoherenceScore,
+    ScriptValidationReport,
+)
+
+
+# ============================================================================
+# FIXTURES
+# ============================================================================
+
+@pytest.fixture
+def script_generator():
+    """Provide ScriptGenerator instance."""
+    return ScriptGenerator(
+        max_refinement_iterations=3,
+        quality_threshold=0.75
+    )
+
+
+@pytest.fixture
+def sample_voice_profiles():
+    """Provide sample character voice profiles."""
+    return {
+        "Luna": CharacterVoiceProfile(
+            character_name="Luna",
+            vocabulary_level="moderate",
+            sentence_structure="complex",
+            catchphrases=["Oh, stars!", "Zero-G zany!"],
+            verbal_tics=["giggles", "sighs dramatically"],
+            speech_patterns=["Enthusiastic", "Scheming"],
+            relationship_dynamics={"Rick": "husband - loving but exasperated"},
+            emotional_range=["excited", "disappointed", "determined"],
+        ),
+        "Rick": CharacterVoiceProfile(
+            character_name="Rick",
+            vocabulary_level="sophisticated",
+            sentence_structure="formal",
+            catchphrases=["Luna!", "This is serious!"],
+            verbal_tics=["shakes head", "pinches bridge of nose"],
+            speech_patterns=["Authoritative", "Patient"],
+            relationship_dynamics={"Luna": "wife - adores but frustrated"},
+            emotional_range=["concerned", "amused", "stern"],
+        ),
+    }
+
+
+@pytest.fixture
+def sample_episode_outline():
+    """Provide sample episode outline."""
+    return {
+        "scenes": [
+            {
+                "scene_number": 1,
+                "title": "Luna's Big Idea",
+                "location": "Luna Prime Station - Control Room",
+                "time": "Day",
+                "characters": ["Luna", "Rick"],
+                "description": "Luna pitches space tourism scheme to Rick",
+                "beat_type": "setup",
+            },
+            {
+                "scene_number": 2,
+                "title": "The Plan Unfolds",
+                "location": "Luna Prime Station - Living Quarters",
+                "time": "Evening",
+                "characters": ["Luna", "Rick"],
+                "description": "Luna explains her elaborate plan",
+                "beat_type": "conflict",
+            },
+            {
+                "scene_number": 3,
+                "title": "Everything Goes Wrong",
+                "location": "Luna Prime Station - Docking Bay",
+                "time": "Day",
+                "characters": ["Luna", "Rick"],
+                "description": "The scheme backfires spectacularly",
+                "beat_type": "resolution",
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def sample_show_metadata():
+    """Provide sample show metadata."""
+    return {
+        "episode_title": "The Space Tourism Scheme",
+        "show_title": "I Love Luna",
+        "episode_number": 1,
+        "season_number": 1,
+        "writers": ["AI Generator"],
+        "original_show": "I Love Lucy",
+        "doppelganger_setting": "2157 Space Colony",
+    }
+
+
+@pytest.fixture
+def mock_scene_dialogue():
+    """Provide mock scene dialogue."""
+    return SceneDialogue(
+        scene_number=1,
+        location="Control Room",
+        time_of_day="Day",
+        characters_present=["Luna", "Rick"],
+        dialogue_lines=[
+            DialogueLine(
+                character="Luna",
+                line="Rick, I have the most wonderful idea!",
+                emotion="excited",
+                timing_in_scene=0.0,
+            ),
+            DialogueLine(
+                character="Rick",
+                line="Luna, what are you planning now?",
+                emotion="concerned",
+                timing_in_scene=3.0,
+            ),
+        ],
+        total_runtime_estimate=60.0,
+        confidence_score=0.9,
+    )
+
+
+@pytest.fixture
+def mock_stage_directions():
+    """Provide mock stage directions."""
+    return SceneStageDirections(
+        scene_description="Modern space station control room",
+        action_descriptions=[
+            StageDirection(
+                action_description="Luna bounces excitedly",
+                timing_in_scene=0.0,
+                characters_involved=["Luna"],
+            )
+        ],
+        physical_comedy_sequences=[],
+        camera_suggestions=[],
+    )
+
+
+@pytest.fixture
+def mock_comedy_analysis():
+    """Provide mock comedy analysis."""
+    return OptimizedScriptComedy(
+        analyzed_jokes=[
+            JokeStructure(
+                joke_id="joke_1",
+                joke_type=JokeType.SITUATIONAL,
+                setup="Luna has an idea",
+                misdirection="Seems reasonable",
+                punchline="It's completely wild",
+                timing_position=5.0,
+                characters_involved=["Luna"],
+                effectiveness_score=0.8,
+                improvement_suggestions=[],
+                callback_potential=0.7,
+                callback_references=[],
+            )
+        ],
+        timing_analysis=ComedyTimingAnalysis(
+            total_jokes=3,
+            average_spacing=45.0,
+            timing_category="well-spaced",
+            clusters=[],
+            dead_zones=[],
+            optimal_spacing=45.0,
+            pacing_score=0.9,
+        ),
+        overall_effectiveness=0.85,
+        weak_jokes=[],
+        strong_jokes=["joke_1"],
+        callback_opportunities=[],
+    )
+
+
+@pytest.fixture
+def mock_validation_report_passing():
+    """Provide mock passing validation report."""
+    return ScriptValidationReport(
+        script_id="test_001",
+        validation_timestamp=datetime.now(),
+        character_consistency={
+            "Luna": CharacterConsistencyScore(
+                character_name="Luna",
+                voice_match_score=0.9,
+                vocabulary_consistency=0.85,
+                catchphrase_usage=0.9,
+                relationship_consistency=0.9,
+                issues=[],
+            )
+        },
+        comedy_distribution=ComedyDistributionAnalysis(
+            total_comedic_beats=3,
+            average_spacing=45.0,
+            effectiveness_average=0.85,
+            weak_joke_count=0,
+            strong_joke_count=3,
+            pacing_issues=[],
+            distribution_score=0.9,
+        ),
+        production_complexity=ProductionComplexityAssessment(
+            location_count=3,
+            location_complexity=0.2,
+            special_effects_count=0,
+            costume_changes=2,
+            prop_count=9,
+            technical_feasibility=0.9,
+            budget_estimate="low",
+            complexity_score=0.9,
+            production_notes=[],
+        ),
+        plot_coherence=PlotCoherenceScore(
+            setup_clarity=0.9,
+            conflict_strength=0.85,
+            resolution_satisfaction=0.9,
+            scene_transitions=0.9,
+            story_arc_completeness=0.9,
+            plot_holes=[],
+        ),
+        validation_issues=[],
+        overall_quality_score=0.88,
+        pass_threshold=0.75,
+        summary="High quality script",
+        recommendations=[],
+    )
+
+
+@pytest.fixture
+def mock_validation_report_failing():
+    """Provide mock failing validation report."""
+    return ScriptValidationReport(
+        script_id="test_001",
+        validation_timestamp=datetime.now(),
+        character_consistency={
+            "Luna": CharacterConsistencyScore(
+                character_name="Luna",
+                voice_match_score=0.6,
+                vocabulary_consistency=0.5,
+                catchphrase_usage=0.6,
+                relationship_consistency=0.7,
+                issues=["Vocabulary inconsistent"],
+            )
+        },
+        comedy_distribution=ComedyDistributionAnalysis(
+            total_comedic_beats=3,
+            average_spacing=45.0,
+            effectiveness_average=0.55,
+            weak_joke_count=2,
+            strong_joke_count=1,
+            pacing_issues=["Comedy clusters detected"],
+            distribution_score=0.6,
+        ),
+        production_complexity=ProductionComplexityAssessment(
+            location_count=3,
+            location_complexity=0.2,
+            special_effects_count=0,
+            costume_changes=2,
+            prop_count=9,
+            technical_feasibility=0.9,
+            budget_estimate="low",
+            complexity_score=0.9,
+            production_notes=[],
+        ),
+        plot_coherence=PlotCoherenceScore(
+            setup_clarity=0.7,
+            conflict_strength=0.6,
+            resolution_satisfaction=0.7,
+            scene_transitions=0.8,
+            story_arc_completeness=0.7,
+            plot_holes=["Weak resolution"],
+        ),
+        validation_issues=[
+            ValidationIssue(
+                issue_id="issue_1",
+                category=ValidationCategory.CHARACTER_CONSISTENCY,
+                severity=ValidationSeverity.ERROR,
+                message="Character voice inconsistent",
+                location="Scene 1",
+                suggestion="Review dialogue",
+                score_impact=-0.1,
+            )
+        ],
+        overall_quality_score=0.65,
+        pass_threshold=0.75,
+        summary="Script needs improvement",
+        recommendations=["Improve character consistency", "Fix weak jokes"],
+    )
+
+
+# ============================================================================
+# SCRIPTGENERATOR INITIALIZATION TESTS
+# ============================================================================
+
+class TestScriptGeneratorInitialization:
+    """Test ScriptGenerator initialization."""
+    
+    def test_initialization_default_parameters(self):
+        """Test initialization with default parameters."""
+        generator = ScriptGenerator()
+        
+        assert generator.max_refinement_iterations == 3
+        assert generator.quality_threshold == 0.75
+        assert generator.dialogue_generator is not None
+        assert generator.stage_direction_generator is not None
+        assert generator.joke_optimizer is not None
+        assert generator.script_validator is not None
+    
+    def test_initialization_custom_parameters(self):
+        """Test initialization with custom parameters."""
+        generator = ScriptGenerator(
+            max_refinement_iterations=5,
+            quality_threshold=0.85
+        )
+        
+        assert generator.max_refinement_iterations == 5
+        assert generator.quality_threshold == 0.85
+
+
+# ============================================================================
+# SCENE GENERATION TESTS
+# ============================================================================
+
+class TestSceneGeneration:
+    """Test individual scene generation."""
+    
+    @patch('src.services.creative.script_generator.DialogueGenerator')
+    @patch('src.services.creative.script_generator.StageDirectionGenerator')
+    def test_generate_scene_script_basic(
+        self,
+        mock_stage_gen,
+        mock_dialogue_gen,
+        script_generator,
+        sample_episode_outline,
+        sample_voice_profiles,
+        mock_scene_dialogue,
+        mock_stage_directions,
+    ):
+        """Test basic scene script generation."""
+        # Setup mocks
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
+        )
+        mock_stage_gen.return_value.generate_stage_directions.return_value = (
+            mock_stage_directions
+        )
+        
+        # Manually update generators
+        script_generator.dialogue_generator = mock_dialogue_gen.return_value
+        script_generator.stage_direction_generator = mock_stage_gen.return_value
+        
+        scene_outline = sample_episode_outline["scenes"][0]
+        
+        # Generate scene
+        scene_script = script_generator._generate_scene_script(
+            scene_outline, sample_voice_profiles
+        )
+        
+        # Verify result
+        assert isinstance(scene_script, SceneScript)
+        assert scene_script.scene_number == 1
+        assert scene_script.scene_title == "Luna's Big Idea"
+        assert scene_script.location == "Luna Prime Station - Control Room"
+        assert scene_script.time_of_day == "Day"
+        assert "Luna" in scene_script.characters_present
+        assert "Rick" in scene_script.characters_present
+        assert scene_script.dialogue == mock_scene_dialogue
+        assert scene_script.stage_directions == mock_stage_directions
+        assert scene_script.estimated_runtime == 60.0
+
+
+# ============================================================================
+# FULL SCRIPT GENERATION TESTS
+# ============================================================================
+
+class TestFullScriptGeneration:
+    """Test complete script generation pipeline."""
+    
+    @patch('src.services.creative.script_generator.ScriptValidator')
+    @patch('src.services.creative.script_generator.JokeOptimizer')
+    @patch('src.services.creative.script_generator.StageDirectionGenerator')
+    @patch('src.services.creative.script_generator.DialogueGenerator')
+    def test_generate_full_script_passing_validation(
+        self,
+        mock_dialogue_gen,
+        mock_stage_gen,
+        mock_joke_opt,
+        mock_validator,
+        script_generator,
+        sample_episode_outline,
+        sample_voice_profiles,
+        sample_show_metadata,
+        mock_scene_dialogue,
+        mock_stage_directions,
+        mock_comedy_analysis,
+        mock_validation_report_passing,
+    ):
+        """Test full script generation with passing validation."""
+        # Setup mocks
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
+        )
+        mock_stage_gen.return_value.generate_stage_directions.return_value = (
+            mock_stage_directions
+        )
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
+        )
+        mock_validator.return_value.validate_script.return_value = (
+            mock_validation_report_passing
+        )
+        
+        # Update generator components
+        script_generator.dialogue_generator = mock_dialogue_gen.return_value
+        script_generator.stage_direction_generator = mock_stage_gen.return_value
+        script_generator.joke_optimizer = mock_joke_opt.return_value
+        script_generator.script_validator = mock_validator.return_value
+        
+        # Generate script
+        full_script = script_generator.generate_full_script(
+            script_id="test_001",
+            episode_outline=sample_episode_outline,
+            character_profiles=sample_voice_profiles,
+            show_metadata=sample_show_metadata,
+        )
+        
+        # Verify result
+        assert isinstance(full_script, FullScript)
+        assert full_script.script_id == "test_001"
+        assert full_script.episode_title == "The Space Tourism Scheme"
+        assert full_script.show_title == "I Love Luna"
+        assert len(full_script.scenes) == 3
+        assert full_script.final_quality_score == 0.88
+        assert full_script.final_validation_report.validation_passed
+        assert len(full_script.refinement_iterations) == 0  # Passed first time
+    
+    @patch('src.services.creative.script_generator.ScriptValidator')
+    @patch('src.services.creative.script_generator.JokeOptimizer')
+    @patch('src.services.creative.script_generator.StageDirectionGenerator')
+    @patch('src.services.creative.script_generator.DialogueGenerator')
+    def test_generate_full_script_with_refinement(
+        self,
+        mock_dialogue_gen,
+        mock_stage_gen,
+        mock_joke_opt,
+        mock_validator,
+        script_generator,
+        sample_episode_outline,
+        sample_voice_profiles,
+        sample_show_metadata,
+        mock_scene_dialogue,
+        mock_stage_directions,
+        mock_comedy_analysis,
+        mock_validation_report_failing,
+        mock_validation_report_passing,
+    ):
+        """Test full script generation with refinement loop."""
+        # Setup mocks - fail once, then pass
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
+        )
+        mock_stage_gen.return_value.generate_stage_directions.return_value = (
+            mock_stage_directions
+        )
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
+        )
+        mock_validator.return_value.validate_script.side_effect = [
+            mock_validation_report_failing,  # First validation fails
+            mock_validation_report_passing,  # After refinement passes
+        ]
+        
+        # Update generator components
+        script_generator.dialogue_generator = mock_dialogue_gen.return_value
+        script_generator.stage_direction_generator = mock_stage_gen.return_value
+        script_generator.joke_optimizer = mock_joke_opt.return_value
+        script_generator.script_validator = mock_validator.return_value
+        
+        # Generate script
+        full_script = script_generator.generate_full_script(
+            script_id="test_002",
+            episode_outline=sample_episode_outline,
+            character_profiles=sample_voice_profiles,
+            show_metadata=sample_show_metadata,
+        )
+        
+        # Verify refinement occurred
+        assert len(full_script.refinement_iterations) == 1
+        assert full_script.refinement_iterations[0].iteration_number == 1
+        assert full_script.refinement_iterations[0].validation_passed
+        assert full_script.final_quality_score == 0.88
+
+
+# ============================================================================
+# REFINEMENT TESTS
+# ============================================================================
+
+class TestRefinementLoop:
+    """Test script refinement logic."""
+    
+    @patch('src.services.creative.script_generator.ScriptValidator')
+    @patch('src.services.creative.script_generator.JokeOptimizer')
+    @patch('src.services.creative.script_generator.StageDirectionGenerator')
+    @patch('src.services.creative.script_generator.DialogueGenerator')
+    def test_max_refinement_iterations_reached(
+        self,
+        mock_dialogue_gen,
+        mock_stage_gen,
+        mock_joke_opt,
+        mock_validator,
+        script_generator,
+        sample_episode_outline,
+        sample_voice_profiles,
+        sample_show_metadata,
+        mock_scene_dialogue,
+        mock_stage_directions,
+        mock_comedy_analysis,
+        mock_validation_report_failing,
+    ):
+        """Test that refinement stops at max iterations."""
+        # Setup mocks - always fail validation
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
+        )
+        mock_stage_gen.return_value.generate_stage_directions.return_value = (
+            mock_stage_directions
+        )
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
+        )
+        mock_validator.return_value.validate_script.return_value = (
+            mock_validation_report_failing
+        )
+        
+        # Update generator components
+        script_generator.dialogue_generator = mock_dialogue_gen.return_value
+        script_generator.stage_direction_generator = mock_stage_gen.return_value
+        script_generator.joke_optimizer = mock_joke_opt.return_value
+        script_generator.script_validator = mock_validator.return_value
+        
+        # Set max iterations to 3
+        script_generator.max_refinement_iterations = 3
+        
+        # Generate script
+        full_script = script_generator.generate_full_script(
+            script_id="test_003",
+            episode_outline=sample_episode_outline,
+            character_profiles=sample_voice_profiles,
+            show_metadata=sample_show_metadata,
+        )
+        
+        # Verify max iterations reached
+        assert len(full_script.refinement_iterations) == 3
+        assert not full_script.final_validation_report.validation_passed
+        assert full_script.final_quality_score == 0.65
+
+
+# ============================================================================
+# EXPORT FORMAT TESTS
+# ============================================================================
+
+class TestExportFormats:
+    """Test script export in various formats."""
+    
+    def test_export_screenplay_format(
+        self,
+        script_generator,
+        tmp_path,
+    ):
+        """Test exporting script in screenplay format."""
+        # Create minimal FullScript
+        scene = SceneScript(
+            scene_number=1,
+            scene_title="Test Scene",
+            location="Test Location",
+            time_of_day="Day",
+            characters_present=["Luna"],
+            dialogue=SceneDialogue(
+                scene_number=1,
+                location="Test Location",
+                time_of_day="Day",
+                characters_present=["Luna"],
+                dialogue_lines=[
+                    DialogueLine(
+                        character="Luna",
+                        line="Test line",
+                        emotion="neutral",
+                        timing_in_scene=0.0,
+                    )
+                ],
+                total_runtime_estimate=30.0,
+                confidence_score=0.9,
+            ),
+            stage_directions=SceneStageDirections(
+                scene_description="Test description",
+                action_descriptions=[],
+                physical_comedy_sequences=[],
+                camera_suggestions=[],
+            ),
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        full_script = FullScript(
+            script_id="test_export",
+            episode_title="Test Episode",
+            show_title="Test Show",
+            episode_number=1,
+            season_number=1,
+            writers=["Test Writer"],
+            original_show="Test Original",
+            doppelganger_setting="Test Setting",
+            scenes=[scene],
+            generation_timestamp=datetime.now(),
+            total_runtime=30.0,
+            total_comedy_beats=1,
+            final_validation_report=Mock(
+                validation_passed=True,
+                summary="Test summary",
+                recommendations=[],
+            ),
+            final_quality_score=0.85,
+            budget_estimate="low",
+            location_count=1,
+            special_effects_count=0,
+        )
+        
+        # Export
+        output_path = tmp_path / "screenplay.txt"
+        script_generator.export_script(
+            full_script,
+            ScriptFormat.SCREENPLAY,
+            str(output_path),
+        )
+        
+        # Verify file created
+        assert output_path.exists()
+        content = output_path.read_text()
+        assert "Test Episode" in content
+        assert "SCENE 1" in content
+        assert "LUNA" in content
+
+
+# ============================================================================
+# DATA MODEL TESTS
+# ============================================================================
+
+class TestDataModelSerialization:
+    """Test serialization of script data models."""
+    
+    def test_scene_script_serialization(self, mock_scene_dialogue, mock_stage_directions):
+        """Test SceneScript to_dict and from_dict."""
+        scene = SceneScript(
+            scene_number=1,
+            scene_title="Test Scene",
+            location="Test Location",
+            time_of_day="Day",
+            characters_present=["Luna", "Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=60.0,
+            comedy_beat_count=2,
+            production_notes=["Test note"],
+        )
+        
+        # Serialize
+        data = scene.to_dict()
+        
+        # Verify
+        assert data["scene_number"] == 1
+        assert data["scene_title"] == "Test Scene"
+        assert "dialogue" in data
+        assert "stage_directions" in data
+        
+        # Deserialize
+        restored = SceneScript.from_dict(data)
+        
+        assert restored.scene_number == scene.scene_number
+        assert restored.scene_title == scene.scene_title
+        assert restored.estimated_runtime == scene.estimated_runtime
+    
+    def test_refinement_iteration_serialization(self, mock_validation_report_passing):
+        """Test RefinementIteration to_dict and from_dict."""
+        iteration = RefinementIteration(
+            iteration_number=1,
+            timestamp=datetime.now(),
+            validation_report=mock_validation_report_passing,
+            quality_score=0.75,
+            validation_passed=False,
+            issues_addressed=["Issue 1"],
+            improvements_made=["Improvement 1"],
+            scenes_modified=[1, 2],
+        )
+        
+        # Serialize
+        data = iteration.to_dict()
+        
+        # Verify
+        assert data["iteration_number"] == 1
+        assert data["quality_score"] == 0.75
+        assert "validation_report" in data
+        
+        # Deserialize
+        restored = RefinementIteration.from_dict(data)
+        
+        assert restored.iteration_number == iteration.iteration_number
+        assert restored.quality_score == iteration.quality_score
+
+
+# ============================================================================
+# HELPER METHOD TESTS
+# ============================================================================
+
+class TestHelperMethods:
+    """Test FullScript helper methods."""
+    
+    def test_get_scene_by_number(self, mock_scene_dialogue, mock_stage_directions):
+        """Test getting scene by number."""
+        scene1 = SceneScript(
+            scene_number=1,
+            scene_title="Scene 1",
+            location="Location 1",
+            time_of_day="Day",
+            characters_present=["Luna"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        scene2 = SceneScript(
+            scene_number=2,
+            scene_title="Scene 2",
+            location="Location 2",
+            time_of_day="Night",
+            characters_present=["Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        full_script = FullScript(
+            script_id="test",
+            episode_title="Test",
+            show_title="Test",
+            episode_number=1,
+            season_number=1,
+            writers=["Test"],
+            original_show="Test",
+            doppelganger_setting="Test",
+            scenes=[scene1, scene2],
+            generation_timestamp=datetime.now(),
+            total_runtime=60.0,
+            total_comedy_beats=2,
+            final_validation_report=Mock(),
+            final_quality_score=0.8,
+            budget_estimate="low",
+            location_count=2,
+            special_effects_count=0,
+        )
+        
+        # Get scene
+        found = full_script.get_scene(1)
+        assert found is not None
+        assert found.scene_number == 1
+        assert found.scene_title == "Scene 1"
+        
+        # Get non-existent scene
+        not_found = full_script.get_scene(999)
+        assert not_found is None
+    
+    def test_get_scenes_by_character(self, mock_scene_dialogue, mock_stage_directions):
+        """Test getting scenes by character."""
+        scene1 = SceneScript(
+            scene_number=1,
+            scene_title="Scene 1",
+            location="Location 1",
+            time_of_day="Day",
+            characters_present=["Luna", "Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        scene2 = SceneScript(
+            scene_number=2,
+            scene_title="Scene 2",
+            location="Location 2",
+            time_of_day="Night",
+            characters_present=["Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        full_script = FullScript(
+            script_id="test",
+            episode_title="Test",
+            show_title="Test",
+            episode_number=1,
+            season_number=1,
+            writers=["Test"],
+            original_show="Test",
+            doppelganger_setting="Test",
+            scenes=[scene1, scene2],
+            generation_timestamp=datetime.now(),
+            total_runtime=60.0,
+            total_comedy_beats=2,
+            final_validation_report=Mock(),
+            final_quality_score=0.8,
+            budget_estimate="low",
+            location_count=2,
+            special_effects_count=0,
+        )
+        
+        # Get Luna scenes
+        luna_scenes = full_script.get_scenes_by_character("Luna")
+        assert len(luna_scenes) == 1
+        assert luna_scenes[0].scene_number == 1
+        
+        # Get Rick scenes
+        rick_scenes = full_script.get_scenes_by_character("Rick")
+        assert len(rick_scenes) == 2
+    
+    def test_get_scenes_by_location(self, mock_scene_dialogue, mock_stage_directions):
+        """Test getting scenes by location."""
+        scene1 = SceneScript(
+            scene_number=1,
+            scene_title="Scene 1",
+            location="Control Room",
+            time_of_day="Day",
+            characters_present=["Luna"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        scene2 = SceneScript(
+            scene_number=2,
+            scene_title="Scene 2",
+            location="Docking Bay",
+            time_of_day="Night",
+            characters_present=["Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        scene3 = SceneScript(
+            scene_number=3,
+            scene_title="Scene 3",
+            location="Control Room",
+            time_of_day="Evening",
+            characters_present=["Luna", "Rick"],
+            dialogue=mock_scene_dialogue,
+            stage_directions=mock_stage_directions,
+            estimated_runtime=30.0,
+            comedy_beat_count=1,
+        )
+        
+        full_script = FullScript(
+            script_id="test",
+            episode_title="Test",
+            show_title="Test",
+            episode_number=1,
+            season_number=1,
+            writers=["Test"],
+            original_show="Test",
+            doppelganger_setting="Test",
+            scenes=[scene1, scene2, scene3],
+            generation_timestamp=datetime.now(),
+            total_runtime=90.0,
+            total_comedy_beats=3,
+            final_validation_report=Mock(),
+            final_quality_score=0.8,
+            budget_estimate="low",
+            location_count=2,
+            special_effects_count=0,
+        )
+        
+        # Get Control Room scenes
+        control_scenes = full_script.get_scenes_by_location("Control Room")
+        assert len(control_scenes) == 2
+        assert all(s.location == "Control Room" for s in control_scenes)
+        
+        # Get Docking Bay scenes
+        docking_scenes = full_script.get_scenes_by_location("Docking Bay")
+        assert len(docking_scenes) == 1

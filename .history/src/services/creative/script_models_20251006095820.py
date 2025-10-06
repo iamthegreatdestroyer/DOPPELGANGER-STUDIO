@@ -242,14 +242,12 @@ class FullScript:
     # Quality metrics
     final_validation_report: ScriptValidationReport
     final_quality_score: float
+    refinement_iterations: List[RefinementIteration] = field(default_factory=list)
     
     # Production metadata
     budget_estimate: str  # low/medium/high
     location_count: int
     special_effects_count: int
-    
-    # Refinement history
-    refinement_iterations: List[RefinementIteration] = field(default_factory=list)
     
     # Additional metadata
     generation_notes: List[str] = field(default_factory=list)

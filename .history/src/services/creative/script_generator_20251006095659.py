@@ -16,8 +16,6 @@ from src.services.creative.dialogue_generator import DialogueGenerator
 from src.services.creative.stage_direction_generator import StageDirectionGenerator
 from src.services.creative.joke_optimizer import JokeOptimizer
 from src.services.creative.script_validator import ScriptValidator
-from src.services.creative.claude_client import ClaudeClient
-from src.services.creative.openai_client import OpenAIClient
 from src.services.creative.script_models import (
     SceneScript,
     RefinementIteration,
@@ -73,17 +71,11 @@ class ScriptGenerator:
         self.max_refinement_iterations = max_refinement_iterations
         self.quality_threshold = quality_threshold
         
-        # Initialize AI clients
-        self.claude_client = ClaudeClient()
-        self.gpt_client = OpenAIClient()
-        
         # Initialize all components
         self.dialogue_generator = DialogueGenerator(
             database_manager=database_manager
         )
         self.stage_direction_generator = StageDirectionGenerator(
-            claude_client=self.claude_client,
-            gpt_client=self.gpt_client,
             database_manager=database_manager
         )
         self.joke_optimizer = JokeOptimizer(
@@ -348,26 +340,12 @@ class ScriptGenerator:
             },
         )
         
-        # Generate stage directions (async call needs to be awaited, but we'll make this synchronous for now)
-        # For production, this should use asyncio.run() or be made async
-        import asyncio
-        try:
-            stage_directions = asyncio.run(
-                self.stage_direction_generator.generate_stage_directions(
-                    scene=scene_outline,
-                    scene_dialogue=dialogue,
-                    comedic_beats=None,
-                )
-            )
-        except Exception as e:
-            logger.warning(f"Stage direction generation failed: {e}, using basic fallback")
-            from src.services.creative.stage_direction_models import SceneStageDirections
-            stage_directions = SceneStageDirections(
-                scene_description=f"Scene at {scene_outline.get('location', 'Unknown')}",
-                action_descriptions=[],
-                physical_comedy_sequences=[],
-                camera_suggestions=[],
-            )
+        # Generate stage directions
+        stage_directions = self.stage_direction_generator.generate_stage_directions(
+            scene_dialogue=dialogue,
+            location=scene_outline.get("location", ""),
+            characters_present=scene_outline.get("characters", []),
+        )
         
         # Count comedy beats in this scene
         comedy_beat_count = sum(
