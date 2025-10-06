@@ -54,23 +54,20 @@ class ClaudeClient:
     def __init__(
         self,
         api_key: str,
-        enable_caching: bool = True,
-        cache_ttl: int = CacheTTL.LONG.value
+        cache_client: Optional[Any] = None,
+        cache_ttl: int = 604800  # 7 days
     ):
         """
         Initialize Claude client.
         
         Args:
             api_key: Anthropic API key
-            enable_caching: Whether to enable response caching
+            cache_client: Optional Redis client for caching
             cache_ttl: Cache time-to-live in seconds (default 7 days)
         """
         self.client = AsyncAnthropic(api_key=api_key)
-        self.enable_caching = enable_caching
+        self.cache_client = cache_client
         self.cache_ttl = cache_ttl
-        
-        # Get cache manager
-        self.cache_manager = get_cache_manager() if enable_caching else None
         
         # Usage tracking
         self.total_tokens_used = 0
@@ -254,14 +251,9 @@ class ClaudeClient:
         max_tokens: int,
         temperature: float
     ) -> str:
-        """Generate cache key from parameters using our cache key generator."""
-        return generate_ai_cache_key(
-            prompt=prompt,
-            model=self.MODEL,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            json_mode=False  # Add json_mode to kwargs if needed
-        )
+        """Generate cache key from parameters."""
+        key_data = f"{prompt}:{system_prompt}:{max_tokens}:{temperature}"
+        return f"claude:{hashlib.sha256(key_data.encode()).hexdigest()}"
     
     async def _get_from_cache(
         self,
@@ -271,24 +263,20 @@ class ClaudeClient:
         temperature: float
     ) -> Optional[AIResponse]:
         """Retrieve response from cache if available."""
-        if not self.cache_manager:
+        if not self.cache_client:
             return None
         
         try:
             key = self._cache_key(prompt, system_prompt, max_tokens, temperature)
-            
-            # Run sync cache get in executor to avoid blocking
-            cached_data = await asyncio.get_event_loop().run_in_executor(
-                None, self.cache_manager.get, key
-            )
+            cached_data = await self.cache_client.get(key)
             
             if cached_data:
-                # Cache manager already deserializes
+                data = json.loads(cached_data)
                 return AIResponse(
-                    content=cached_data['content'],
-                    model=cached_data['model'],
-                    tokens_used=cached_data['tokens_used'],
-                    finish_reason=cached_data['finish_reason'],
+                    content=data['content'],
+                    model=data['model'],
+                    tokens_used=data['tokens_used'],
+                    finish_reason=data['finish_reason'],
                     cached=True
                 )
         except Exception as e:
@@ -305,7 +293,7 @@ class ClaudeClient:
         response: AIResponse
     ):
         """Save response to cache."""
-        if not self.cache_manager:
+        if not self.cache_client:
             return
         
         try:
@@ -317,10 +305,10 @@ class ClaudeClient:
                 'finish_reason': response.finish_reason
             }
             
-            # Run sync cache set in executor
-            await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.cache_manager.set(key, cache_data, self.cache_ttl)
+            await self.cache_client.setex(
+                key,
+                self.cache_ttl,
+                json.dumps(cache_data)
             )
         except Exception as e:
             logger.warning(f"Cache save failed: {e}")

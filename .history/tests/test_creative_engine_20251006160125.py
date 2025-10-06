@@ -75,20 +75,17 @@ class TestClaudeClient:
         """Test response caching."""
         client = ClaudeClient(api_key="test_key", enable_caching=True)
         
-        # Clear any existing cache
-        client.cache_manager.clear()
-        
         with patch.object(
             client,
             '_make_request_with_retry',
             new=AsyncMock(return_value=mock_anthropic_response)
         ):
             # First call should miss cache
-            response1 = await client.generate("Test prompt cache test", use_cache=True)
+            response1 = await client.generate("Test prompt", use_cache=True)
             assert response1.cached is False
             
             # Second call should hit cache
-            response2 = await client.generate("Test prompt cache test", use_cache=True)
+            response2 = await client.generate("Test prompt", use_cache=True)
             assert response2.cached is True
             assert response2.content == "Generated response"
     
