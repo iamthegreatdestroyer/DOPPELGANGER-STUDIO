@@ -895,9 +895,11 @@ class TestDashboard:
         
         assert session is not None
         assert "session_id" in session
-        assert "operations_count" in session
+        assert "total_operations" in session
+        assert "successful_operations" in session
+        assert "failed_operations" in session
         assert session["session_id"] == "dashboard_test"
-        assert session["operations_count"] == 5
+        assert session["total_operations"] == 5
     
     def test_dashboard_operation_statistics(self, monitor_with_data):
         """Test operation statistics in dashboard."""
@@ -909,10 +911,10 @@ class TestDashboard:
         
         for op_name, op_stats in stats.items():
             assert "count" in op_stats
-            assert "avg_time_seconds" in op_stats
-            assert "min_time_seconds" in op_stats
-            assert "max_time_seconds" in op_stats
-            assert "error_count" in op_stats
+            assert "avg_time" in op_stats
+            assert "min_time" in op_stats
+            assert "max_time" in op_stats
+            assert "errors" in op_stats
             assert op_stats["count"] > 0
     
     def test_dashboard_recent_operations(self, monitor_with_data):
@@ -938,11 +940,11 @@ class TestDashboard:
         assert "recent" in alerts
         
         summary = alerts["summary"]
-        assert "total" in summary
-        assert "critical" in summary
-        assert "error" in summary
-        assert "warning" in summary
-        assert "info" in summary
+        assert "total_alerts" in summary
+        assert "critical_count" in summary
+        assert "error_count" in summary
+        assert "warning_count" in summary
+        assert "info_count" in summary
     
     def test_get_performance_report(self, monitor_with_data):
         """Test human-readable performance report."""
@@ -950,19 +952,25 @@ class TestDashboard:
         
         assert isinstance(report, str)
         assert len(report) > 0
-        assert "DASHBOARD" in report or "SESSION" in report or "MONITORING" in report
+        assert "Performance Report" in report or "Session" in report
 
 
 class TestContextManager:
     """Test PerformanceContext context manager."""
     
-    def test_context_manager_sync(self):
-        """Test synchronous context manager."""
-        from src.services.monitoring.performance_monitor import PerformanceContext, get_performance_monitor
-        
-        monitor = get_performance_monitor()
+    @pytest.fixture
+    def monitor(self):
+        """Create monitor for context manager tests."""
+        from src.services.monitoring.performance_monitor import PerformanceMonitor
+        monitor = PerformanceMonitor()
         monitor.enable()
-        monitor.start_session("ctx_sync_test")
+        monitor.start_session("context_test")
+        yield monitor
+        monitor.end_session()
+    
+    def test_context_manager_sync(self, monitor):
+        """Test synchronous context manager."""
+        from src.services.monitoring.performance_monitor import PerformanceContext
         
         initial_count = len(monitor.current_session.operations)
         
@@ -977,17 +985,11 @@ class TestContextManager:
         operations = [op for op in metrics.operations if op.operation_name == "sync_operation"]
         assert len(operations) == 1
         assert operations[0].success is True
-        
-        monitor.end_session()
     
     @pytest.mark.asyncio
-    async def test_context_manager_async(self):
+    async def test_context_manager_async(self, monitor):
         """Test asynchronous context manager."""
-        from src.services.monitoring.performance_monitor import PerformanceContext, get_performance_monitor
-        
-        monitor = get_performance_monitor()
-        monitor.enable()
-        monitor.start_session("ctx_async_test")
+        from src.services.monitoring.performance_monitor import PerformanceContext
         
         initial_count = len(monitor.current_session.operations)
         
@@ -1001,16 +1003,10 @@ class TestContextManager:
         metrics = monitor.get_current_metrics()
         operations = [op for op in metrics.operations if op.operation_name == "async_operation"]
         assert len(operations) == 1
-        
-        monitor.end_session()
     
-    def test_context_manager_with_error(self):
+    def test_context_manager_with_error(self, monitor):
         """Test context manager handles errors correctly."""
-        from src.services.monitoring.performance_monitor import PerformanceContext, get_performance_monitor
-        
-        monitor = get_performance_monitor()
-        monitor.enable()
-        monitor.start_session("ctx_error_test")
+        from src.services.monitoring.performance_monitor import PerformanceContext
         
         initial_count = len(monitor.current_session.operations)
         
@@ -1029,16 +1025,10 @@ class TestContextManager:
         assert len(operations) == 1
         assert operations[0].success is False
         assert operations[0].error == "Test error"
-        
-        monitor.end_session()
     
-    def test_context_manager_with_metadata(self):
+    def test_context_manager_with_metadata(self, monitor):
         """Test adding metadata through context manager."""
-        from src.services.monitoring.performance_monitor import PerformanceContext, get_performance_monitor
-        
-        monitor = get_performance_monitor()
-        monitor.enable()
-        monitor.start_session("ctx_meta_test")
+        from src.services.monitoring.performance_monitor import PerformanceContext
         
         with PerformanceContext("metadata_operation", metadata={"user": "test_user", "count": 42}) as ctx:
             pass
@@ -1049,16 +1039,10 @@ class TestContextManager:
         assert len(operations) == 1
         assert operations[0].metadata["user"] == "test_user"
         assert operations[0].metadata["count"] == 42
-        
-        monitor.end_session()
     
-    def test_monitor_block_convenience(self):
+    def test_monitor_block_convenience(self, monitor):
         """Test monitor_block convenience function."""
-        from src.services.monitoring.performance_monitor import monitor_block, get_performance_monitor
-        
-        monitor = get_performance_monitor()
-        monitor.enable()
-        monitor.start_session("ctx_block_test")
+        from src.services.monitoring.performance_monitor import monitor_block
         
         initial_count = len(monitor.current_session.operations)
         
@@ -1067,8 +1051,6 @@ class TestContextManager:
         
         # Verify it worked
         assert len(monitor.current_session.operations) == initial_count + 1
-        
-        monitor.end_session()
 
 
 class TestMemoryTracking:

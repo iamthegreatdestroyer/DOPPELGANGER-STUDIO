@@ -856,22 +856,16 @@ def get_performance_monitor() -> PerformanceMonitor:
 
 
 # ============================================================================
-# DECORATORS AND CONTEXT MANAGERS
+# DECORATORS
 # ============================================================================
 
 def monitor_performance(operation_name: Optional[str] = None):
     """
     Decorator to monitor function performance.
     
-    Tracks execution time, memory usage, CPU usage, and errors.
-    
     Usage:
         @monitor_performance("my_operation")
         def my_function():
-            pass
-        
-        @monitor_performance()  # Uses function name
-        def another_function():
             pass
     """
     def decorator(func: Callable) -> Callable:
@@ -902,15 +896,9 @@ def monitor_async_performance(operation_name: Optional[str] = None):
     """
     Decorator to monitor async function performance.
     
-    Tracks execution time, memory usage, CPU usage, and errors.
-    
     Usage:
         @monitor_async_performance("my_async_operation")
         async def my_async_function():
-            pass
-        
-        @monitor_async_performance()  # Uses function name
-        async def another_async_function():
             pass
     """
     def decorator(func: Callable) -> Callable:
@@ -935,136 +923,3 @@ def monitor_async_performance(operation_name: Optional[str] = None):
         
         return wrapper
     return decorator
-
-
-class PerformanceContext:
-    """
-    Context manager for monitoring code blocks.
-    
-    Usage:
-        with PerformanceContext("complex_operation"):
-            # Your code here
-            perform_complex_task()
-        
-        # Async version
-        async with PerformanceContext("async_operation"):
-            # Your async code here
-            await perform_async_task()
-    """
-    
-    def __init__(self, operation_name: str, metadata: Optional[Dict] = None):
-        """
-        Initialize context manager.
-        
-        Args:
-            operation_name: Name of the operation to monitor
-            metadata: Optional metadata to attach to operation
-        """
-        self.operation_name = operation_name
-        self.metadata = metadata or {}
-        self.monitor = get_performance_monitor()
-        self.operation: Optional[OperationMetrics] = None
-    
-    def __enter__(self):
-        """Enter context (sync version)."""
-        self.operation = self.monitor.start_operation(self.operation_name)
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit context (sync version)."""
-        success = exc_type is None
-        error = str(exc_val) if exc_val else None
-        self.monitor.end_operation(
-            self.operation,
-            success=success,
-            error=error,
-            metadata=self.metadata
-        )
-        return False  # Don't suppress exceptions
-    
-    async def __aenter__(self):
-        """Enter context (async version)."""
-        self.operation = self.monitor.start_operation(self.operation_name)
-        return self
-    
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Exit context (async version)."""
-        success = exc_type is None
-        error = str(exc_val) if exc_val else None
-        self.monitor.end_operation(
-            self.operation,
-            success=success,
-            error=error,
-            metadata=self.metadata
-        )
-        return False  # Don't suppress exceptions
-    
-    def add_metadata(self, key: str, value: Any):
-        """Add metadata to the operation."""
-        self.metadata[key] = value
-
-
-# Convenience function for creating monitoring context
-def monitor_block(operation_name: str, metadata: Optional[Dict] = None) -> PerformanceContext:
-    """
-    Create a performance monitoring context.
-    
-    Usage:
-        with monitor_block("my_operation"):
-            # Code to monitor
-            pass
-    """
-    return PerformanceContext(operation_name, metadata)
-
-
-# ============================================================================
-# UTILITY FUNCTIONS
-# ============================================================================
-
-def enable_memory_tracking():
-    """Enable detailed memory tracking using tracemalloc."""
-    if not tracemalloc.is_tracing():
-        tracemalloc.start()
-        logger.info("Memory tracking enabled")
-
-
-def disable_memory_tracking():
-    """Disable detailed memory tracking."""
-    if tracemalloc.is_tracing():
-        tracemalloc.stop()
-        logger.info("Memory tracking disabled")
-
-
-def get_memory_snapshot():
-    """Get current memory snapshot if tracking is enabled."""
-    if tracemalloc.is_tracing():
-        return tracemalloc.take_snapshot()
-    return None
-
-
-def compare_memory_snapshots(snapshot1, snapshot2, top_n: int = 10):
-    """
-    Compare two memory snapshots and return top differences.
-    
-    Args:
-        snapshot1: First snapshot
-        snapshot2: Second snapshot
-        top_n: Number of top differences to return
-    
-    Returns:
-        List of memory differences
-    """
-    if not snapshot1 or not snapshot2:
-        return []
-    
-    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-    differences = []
-    
-    for stat in top_stats[:top_n]:
-        differences.append({
-            'filename': stat.traceback.format()[0],
-            'size_diff_kb': stat.size_diff / 1024,
-            'count_diff': stat.count_diff
-        })
-    
-    return differences
