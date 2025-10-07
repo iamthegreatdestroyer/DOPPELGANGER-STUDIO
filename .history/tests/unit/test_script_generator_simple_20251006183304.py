@@ -38,8 +38,8 @@ def script_generator():
             max_parallel_scenes=3
         )
         
-        # Mock the component responses (generate_dialogue is async now)
-        generator.dialogue_generator.generate_dialogue = AsyncMock(
+        # Mock the component responses
+        generator.dialogue_generator.generate_dialogue = Mock(
             return_value=create_mock_dialogue()
         )
         generator.stage_direction_generator.generate_stage_directions = AsyncMock(
@@ -307,8 +307,7 @@ class TestFullScriptGeneration:
 class TestComponentCoordination:
     """Test coordination between components."""
     
-    @pytest.mark.asyncio
-    async def test_dialogue_generator_called_for_each_scene(
+    def test_dialogue_generator_called_for_each_scene(
         self,
         script_generator,
         sample_episode_outline,
@@ -316,18 +315,18 @@ class TestComponentCoordination:
         sample_show_metadata,
     ):
         """Test that dialogue generator is called for each scene."""
-        full_script = await script_generator.generate_full_script(
-            script_id="test_004",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
+        with patch('asyncio.run', return_value=create_mock_stage_directions()):
+            full_script = script_generator.generate_full_script(
+                script_id="test_004",
+                episode_outline=sample_episode_outline,
+                character_profiles=sample_voice_profiles,
+                show_metadata=sample_show_metadata,
+            )
         
         # Should be called once per scene
         assert script_generator.dialogue_generator.generate_dialogue.call_count == 2
     
-    @pytest.mark.asyncio
-    async def test_joke_optimizer_called_with_all_dialogues(
+    def test_joke_optimizer_called_with_all_dialogues(
         self,
         script_generator,
         sample_episode_outline,
@@ -335,18 +334,18 @@ class TestComponentCoordination:
         sample_show_metadata,
     ):
         """Test that joke optimizer receives all scene dialogues."""
-        full_script = await script_generator.generate_full_script(
-            script_id="test_005",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
+        with patch('asyncio.run', return_value=create_mock_stage_directions()):
+            full_script = script_generator.generate_full_script(
+                script_id="test_005",
+                episode_outline=sample_episode_outline,
+                character_profiles=sample_voice_profiles,
+                show_metadata=sample_show_metadata,
+            )
         
         # Should be called once with all dialogues
         assert script_generator.joke_optimizer.optimize_script_comedy.call_count == 1
     
-    @pytest.mark.asyncio
-    async def test_validator_called_with_correct_parameters(
+    def test_validator_called_with_correct_parameters(
         self,
         script_generator,
         sample_episode_outline,
@@ -354,12 +353,13 @@ class TestComponentCoordination:
         sample_show_metadata,
     ):
         """Test that validator is called with correct parameters."""
-        full_script = await script_generator.generate_full_script(
-            script_id="test_006",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
+        with patch('asyncio.run', return_value=create_mock_stage_directions()):
+            full_script = script_generator.generate_full_script(
+                script_id="test_006",
+                episode_outline=sample_episode_outline,
+                character_profiles=sample_voice_profiles,
+                show_metadata=sample_show_metadata,
+            )
         
         # Verify validator was called
         assert script_generator.script_validator.validate_script.called

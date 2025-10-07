@@ -343,11 +343,7 @@ class TestScriptGeneratorInitialization:
     def test_initialization_default_parameters(self):
         """Test initialization with default parameters."""
         with patch('src.services.creative.script_generator.ClaudeClient'), \
-             patch('src.services.creative.script_generator.OpenAIClient'), \
-             patch('src.services.creative.script_generator.DialogueGenerator'), \
-             patch('src.services.creative.script_generator.StageDirectionGenerator'), \
-             patch('src.services.creative.script_generator.JokeOptimizer'), \
-             patch('src.services.creative.script_generator.ScriptValidator'):
+             patch('src.services.creative.script_generator.OpenAIClient'):
             generator = ScriptGenerator()
             
             assert generator.max_refinement_iterations == 3
@@ -361,11 +357,7 @@ class TestScriptGeneratorInitialization:
     def test_initialization_custom_parameters(self):
         """Test initialization with custom parameters."""
         with patch('src.services.creative.script_generator.ClaudeClient'), \
-             patch('src.services.creative.script_generator.OpenAIClient'), \
-             patch('src.services.creative.script_generator.DialogueGenerator'), \
-             patch('src.services.creative.script_generator.StageDirectionGenerator'), \
-             patch('src.services.creative.script_generator.JokeOptimizer'), \
-             patch('src.services.creative.script_generator.ScriptValidator'):
+             patch('src.services.creative.script_generator.OpenAIClient'):
             generator = ScriptGenerator(
                 max_refinement_iterations=5,
                 quality_threshold=0.85,

@@ -349,19 +349,6 @@ class ScriptGenerator:
             generation_notes=generation_notes,
         )
         
-        # End performance monitoring
-        metrics = self.performance_monitor.end_session()
-        if metrics:
-            # Update metrics with script-specific data
-            metrics.scenes_generated = len(scene_scripts)
-            metrics.dialogue_lines_generated = sum(
-                len(scene.dialogue.dialogue_lines) for scene in scene_scripts
-            )
-            metrics.jokes_analyzed = comedy_analysis.timing_analysis.total_jokes
-            
-            # Log performance summary
-            logger.info(f"Performance Summary:\n{metrics.get_summary()}")
-        
         logger.info(
             f"Script generation complete: {script_id} "
             f"({len(scene_scripts)} scenes, {total_runtime/60:.1f}m, "
@@ -498,27 +485,6 @@ class ScriptGenerator:
         )
         
         return scene_scripts, comedy_analysis
-    
-    def get_performance_metrics(self) -> Optional[PerformanceMetrics]:
-        """
-        Get performance metrics for the current or most recent session.
-        
-        Returns:
-            PerformanceMetrics if available, None otherwise
-        
-        Example:
-            >>> script = await generator.generate_full_script(...)
-            >>> metrics = generator.get_performance_metrics()
-            >>> print(f"Cache hit rate: {metrics.cache_hit_rate:.1%}")
-            >>> print(f"Total time: {metrics.total_duration_seconds:.1f}s")
-        """
-        current = self.performance_monitor.get_current_metrics()
-        if current:
-            return current
-        
-        # Return most recent completed session
-        history = self.performance_monitor.get_session_history()
-        return history[-1] if history else None
     
     def export_script(
         self,

@@ -499,27 +499,6 @@ class ScriptGenerator:
         
         return scene_scripts, comedy_analysis
     
-    def get_performance_metrics(self) -> Optional[PerformanceMetrics]:
-        """
-        Get performance metrics for the current or most recent session.
-        
-        Returns:
-            PerformanceMetrics if available, None otherwise
-        
-        Example:
-            >>> script = await generator.generate_full_script(...)
-            >>> metrics = generator.get_performance_metrics()
-            >>> print(f"Cache hit rate: {metrics.cache_hit_rate:.1%}")
-            >>> print(f"Total time: {metrics.total_duration_seconds:.1f}s")
-        """
-        current = self.performance_monitor.get_current_metrics()
-        if current:
-            return current
-        
-        # Return most recent completed session
-        history = self.performance_monitor.get_session_history()
-        return history[-1] if history else None
-    
     def export_script(
         self,
         script: FullScript,

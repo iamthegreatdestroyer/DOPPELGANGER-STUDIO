@@ -19,11 +19,6 @@ from src.services.creative.joke_optimizer import JokeOptimizer
 from src.services.creative.script_validator import ScriptValidator
 from src.services.creative.claude_client import ClaudeClient
 from src.services.creative.openai_client import OpenAIClient
-from src.services.monitoring.performance_monitor import (
-    get_performance_monitor,
-    PerformanceMetrics,
-    monitor_async_performance,
-)
 from src.services.creative.script_models import (
     SceneScript,
     RefinementIteration,
@@ -82,9 +77,6 @@ class ScriptGenerator:
         self.quality_threshold = quality_threshold
         self.max_parallel_scenes = max_parallel_scenes
         
-        # Initialize performance monitor
-        self.performance_monitor = get_performance_monitor()
-        
         # Initialize AI clients
         self.claude_client = ClaudeClient()
         self.gpt_client = OpenAIClient()
@@ -112,7 +104,6 @@ class ScriptGenerator:
             f"threshold={quality_threshold})"
         )
     
-    @monitor_async_performance("generate_full_script")
     async def generate_full_script(
         self,
         script_id: str,
@@ -159,10 +150,6 @@ class ScriptGenerator:
             ... )
         """
         logger.info(f"Starting full script generation: {script_id}")
-        
-        # Start performance monitoring session
-        self.performance_monitor.start_session(script_id)
-        
         start_time = datetime.now()
         
         # Extract outline data
@@ -349,19 +336,6 @@ class ScriptGenerator:
             generation_notes=generation_notes,
         )
         
-        # End performance monitoring
-        metrics = self.performance_monitor.end_session()
-        if metrics:
-            # Update metrics with script-specific data
-            metrics.scenes_generated = len(scene_scripts)
-            metrics.dialogue_lines_generated = sum(
-                len(scene.dialogue.dialogue_lines) for scene in scene_scripts
-            )
-            metrics.jokes_analyzed = comedy_analysis.timing_analysis.total_jokes
-            
-            # Log performance summary
-            logger.info(f"Performance Summary:\n{metrics.get_summary()}")
-        
         logger.info(
             f"Script generation complete: {script_id} "
             f"({len(scene_scripts)} scenes, {total_runtime/60:.1f}m, "
@@ -389,8 +363,8 @@ class ScriptGenerator:
         
         logger.debug(f"Generating scene {scene_number}...")
         
-        # Generate dialogue (already async)
-        dialogue = await self.dialogue_generator.generate_dialogue(
+        # Generate dialogue
+        dialogue = self.dialogue_generator.generate_dialogue(
             scene_description=scene_outline.get("description", ""),
             characters=scene_outline.get("characters", []),
             voice_profiles=character_profiles,
@@ -498,27 +472,6 @@ class ScriptGenerator:
         )
         
         return scene_scripts, comedy_analysis
-    
-    def get_performance_metrics(self) -> Optional[PerformanceMetrics]:
-        """
-        Get performance metrics for the current or most recent session.
-        
-        Returns:
-            PerformanceMetrics if available, None otherwise
-        
-        Example:
-            >>> script = await generator.generate_full_script(...)
-            >>> metrics = generator.get_performance_metrics()
-            >>> print(f"Cache hit rate: {metrics.cache_hit_rate:.1%}")
-            >>> print(f"Total time: {metrics.total_duration_seconds:.1f}s")
-        """
-        current = self.performance_monitor.get_current_metrics()
-        if current:
-            return current
-        
-        # Return most recent completed session
-        history = self.performance_monitor.get_session_history()
-        return history[-1] if history else None
     
     def export_script(
         self,

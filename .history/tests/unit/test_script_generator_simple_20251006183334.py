@@ -38,8 +38,8 @@ def script_generator():
             max_parallel_scenes=3
         )
         
-        # Mock the component responses (generate_dialogue is async now)
-        generator.dialogue_generator.generate_dialogue = AsyncMock(
+        # Mock the component responses
+        generator.dialogue_generator.generate_dialogue = Mock(
             return_value=create_mock_dialogue()
         )
         generator.stage_direction_generator.generate_stage_directions = AsyncMock(
