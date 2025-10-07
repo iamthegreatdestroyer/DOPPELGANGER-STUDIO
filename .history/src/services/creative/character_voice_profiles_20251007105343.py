@@ -270,10 +270,6 @@ class SceneDialogue:
     def from_dict(cls, data: dict) -> "SceneDialogue":
         """Create SceneDialogue from dictionary."""
         from datetime import datetime
-        generated_at_str = data.get(
-            'generated_at', 
-            datetime.now().isoformat()
-        )
         return cls(
             scene_number=data['scene_number'],
             location=data['location'],
@@ -283,7 +279,7 @@ class SceneDialogue:
             ],
             total_runtime_estimate=data['total_runtime_estimate'],
             comedic_beats_count=data['comedic_beats_count'],
-            generated_at=datetime.fromisoformat(generated_at_str),
+            generated_at=datetime.fromisoformat(data.get('generated_at', datetime.now().isoformat())),
             confidence_score=data.get('confidence_score', 0.0)
         )
 

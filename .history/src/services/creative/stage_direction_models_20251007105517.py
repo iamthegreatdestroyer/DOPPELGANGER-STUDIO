@@ -307,37 +307,7 @@ class SceneStageDirections:
                 s.to_dict() for s in self.physical_comedy_sequences
             ],
             'closing_description': self.closing_description,
-            'camera_suggestions': [
-                c.to_dict() for c in self.camera_suggestions
-            ],
+            'camera_suggestions': [c.to_dict() for c in self.camera_suggestions],
             'total_visual_runtime': self.total_visual_runtime,
             'generated_at': self.generated_at.isoformat()
         }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> "SceneStageDirections":
-        """Create SceneStageDirections from dictionary."""
-        from datetime import datetime
-        generated_at_str = data.get(
-            'generated_at',
-            datetime.now().isoformat()
-        )
-        return cls(
-            scene_number=data['scene_number'],
-            opening_description=data['opening_description'],
-            action_beats=[
-                StageDirection.from_dict(b) for b in data['action_beats']
-            ],
-            physical_comedy_sequences=[
-                PhysicalComedySequence.from_dict(s)
-                for s in data['physical_comedy_sequences']
-            ],
-            closing_description=data['closing_description'],
-            camera_suggestions=[
-                CameraSuggestion.from_dict(c)
-                for c in data['camera_suggestions']
-            ],
-            total_visual_runtime=data['total_visual_runtime'],
-            generated_at=datetime.fromisoformat(generated_at_str)
-        )
-

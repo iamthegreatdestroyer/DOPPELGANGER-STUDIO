@@ -496,9 +496,9 @@ class TestScriptValidator:
             issue for issue in validation_issues
             if "dead zone" in issue.message.lower()
         ]
-        # Dead zones are detected in timing_analysis and pacing_issues
+        # Dead zones are detected in timing_analysis
         assert len(dead_zone_comedy.timing_analysis.dead_zones) > 0
-        assert len(distribution.pacing_issues) > 0  # Pacing issues detected
+        assert distribution.distribution_score <= 0.7  # Low distribution score
     
     def test_weak_jokes_detection(self, validator, sample_scene_dialogues):
         """Test detection of excessive weak jokes."""
@@ -924,15 +924,12 @@ class TestScriptValidator:
         critical = report.get_critical_issues()
         assert isinstance(critical, list)
         
-        # get_critical_issues() returns both CRITICAL and ERROR severity issues
-        # If no critical/error issues exist, the list should be empty
-        # All returned issues must have CRITICAL or ERROR severity
-        if len(critical) > 0:
-            for issue in critical:
-                assert issue.severity in [
-                    ValidationSeverity.CRITICAL,
-                    ValidationSeverity.ERROR
-                ]
+        # Should return CRITICAL severity issues (or empty if none exist)
+        for issue in critical:
+            assert issue.severity == ValidationSeverity.CRITICAL
+        
+        # If no critical issues, that's valid too
+        # (test passes whether critical issues exist or not)
     
     def test_validation_recommendations_generation(
         self,

@@ -120,23 +120,6 @@ class StageDirection:
                 if self.camera_suggestion else None
             )
         }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> "StageDirection":
-        """Create StageDirection from dictionary."""
-        camera_data = data.get('camera_suggestion')
-        camera = (
-            CameraSuggestion.from_dict(camera_data)
-            if camera_data else None
-        )
-        return cls(
-            timing=data['timing'],
-            description=data['description'],
-            duration_estimate=data['duration_estimate'],
-            involves_characters=data['involves_characters'],
-            visual_gag=data.get('visual_gag', False),
-            camera_suggestion=camera
-        )
 
 
 @dataclass
@@ -194,32 +177,11 @@ class PhysicalComedySequence:
         return {
             'beat_name': self.beat_name,
             'setup_actions': [a.to_dict() for a in self.setup_actions],
-            'escalation_actions': [
-                a.to_dict() for a in self.escalation_actions
-            ],
+            'escalation_actions': [a.to_dict() for a in self.escalation_actions],
             'climax_action': self.climax_action.to_dict(),
             'resolution_action': self.resolution_action.to_dict(),
             'total_duration': self.total_duration
         }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> "PhysicalComedySequence":
-        """Create PhysicalComedySequence from dictionary."""
-        return cls(
-            beat_name=data['beat_name'],
-            setup_actions=[
-                StageDirection.from_dict(a) for a in data['setup_actions']
-            ],
-            escalation_actions=[
-                StageDirection.from_dict(a)
-                for a in data['escalation_actions']
-            ],
-            climax_action=StageDirection.from_dict(data['climax_action']),
-            resolution_action=StageDirection.from_dict(
-                data['resolution_action']
-            ),
-            total_duration=data['total_duration']
-        )
 
 
 @dataclass
@@ -307,37 +269,7 @@ class SceneStageDirections:
                 s.to_dict() for s in self.physical_comedy_sequences
             ],
             'closing_description': self.closing_description,
-            'camera_suggestions': [
-                c.to_dict() for c in self.camera_suggestions
-            ],
+            'camera_suggestions': [c.to_dict() for c in self.camera_suggestions],
             'total_visual_runtime': self.total_visual_runtime,
             'generated_at': self.generated_at.isoformat()
         }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> "SceneStageDirections":
-        """Create SceneStageDirections from dictionary."""
-        from datetime import datetime
-        generated_at_str = data.get(
-            'generated_at',
-            datetime.now().isoformat()
-        )
-        return cls(
-            scene_number=data['scene_number'],
-            opening_description=data['opening_description'],
-            action_beats=[
-                StageDirection.from_dict(b) for b in data['action_beats']
-            ],
-            physical_comedy_sequences=[
-                PhysicalComedySequence.from_dict(s)
-                for s in data['physical_comedy_sequences']
-            ],
-            closing_description=data['closing_description'],
-            camera_suggestions=[
-                CameraSuggestion.from_dict(c)
-                for c in data['camera_suggestions']
-            ],
-            total_visual_runtime=data['total_visual_runtime'],
-            generated_at=datetime.fromisoformat(generated_at_str)
-        )
-

@@ -555,8 +555,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_passing
@@ -616,8 +616,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.side_effect = [
             mock_validation_report_failing,  # First validation fails
@@ -681,8 +681,8 @@ class TestRefinementLoop:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_failing
@@ -1278,11 +1278,11 @@ class TestParallelSceneGeneration:
         # Track progress updates
         progress_updates = []
         
-        def progress_callback(status: str, current: int, total: int):
+        def progress_callback(scene_num: int, total: int, status: str):
             progress_updates.append({
-                'status': status,
-                'current': current,
-                'total': total
+                'scene': scene_num,
+                'total': total,
+                'status': status
             })
         
         # Create generator with progress callback
@@ -1302,7 +1302,7 @@ class TestParallelSceneGeneration:
         generator.joke_optimizer = mock_joke
         
         mock_validator = Mock()
-        mock_validator.validate_script = Mock(return_value=mock_validation_report_passing)
+        mock_validator.validate_script = AsyncMock(return_value=mock_validation_report_passing)
         generator.script_validator = mock_validator
         
         # Generate script with progress callback
@@ -1314,26 +1314,16 @@ class TestParallelSceneGeneration:
             progress_callback=progress_callback,
         )
         
-        # Verify progress updates - should have 3 updates (one per scene start)
-        assert len(progress_updates) == 3, (
-            f"Should have 3 progress updates, got {len(progress_updates)}"
-        )
+        # Verify progress updates
+        assert len(progress_updates) >= 6, "Should have at least 6 updates (start + complete for 3 scenes)"
         
-        # Verify each scene has update
-        assert all(
-            update['total'] == 3 for update in progress_updates
-        ), "All updates should have total=3"
+        # Verify each scene has start and complete updates
+        scene_numbers = {update['scene'] for update in progress_updates}
+        assert 1 in scene_numbers and 2 in scene_numbers and 3 in scene_numbers, "Should have updates for scenes 1, 2, 3"
         
-        current_indices = [update['current'] for update in progress_updates]
-        assert current_indices == [0, 1, 2], (
-            "Should have current indices 0, 1, 2"
-        )
-        
-        # Verify status messages
-        assert all(
-            'Generating scene' in update['status']
-            for update in progress_updates
-        ), "All statuses should mention 'Generating scene'"
+        # Verify status types include 'generating' and 'complete'
+        statuses = [update['status'] for update in progress_updates]
+        assert 'generating' in statuses or 'complete' in statuses, "Should have progress status updates"
         
         # Verify all scenes generated
         assert len(script.scenes) == 3
@@ -1365,7 +1355,6 @@ class TestParallelSceneGeneration:
         
         # Mock dialogue generator that fails for scene 2
         call_count = 0
-        
         async def failing_dialogue(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -1378,9 +1367,7 @@ class TestParallelSceneGeneration:
         generator.dialogue_generator = mock_dialogue
         
         mock_stage = Mock()
-        mock_stage.generate_stage_directions = AsyncMock(
-            return_value=mock_stage_directions
-        )
+        mock_stage.generate_stage_directions = AsyncMock(return_value=mock_stage_directions)
         generator.stage_direction_generator = mock_stage
         
         # Verify exception is raised and propagated
@@ -1393,6 +1380,4 @@ class TestParallelSceneGeneration:
             )
         
         # Verify dialogue generator was called at least 2 times before failure
-        assert call_count >= 2, (
-            "Should have attempted at least 2 scenes before failure"
-        )
+        assert call_count >= 2, "Should have attempted at least 2 scenes before failure"

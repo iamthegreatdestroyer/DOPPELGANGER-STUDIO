@@ -161,7 +161,7 @@ class TestScriptValidator:
                     characters_involved=["Luna"],
                     effectiveness_score=0.85,
                     improvement_suggestions=[],
-                    callback_potential=True,  # Was 0.6,
+                    callback_potential=0.6,
                 ),
                 JokeStructure(
                     joke_id="joke_2",
@@ -173,7 +173,7 @@ class TestScriptValidator:
                     characters_involved=["Luna", "Riko"],
                     effectiveness_score=0.50,  # Weak joke
                     improvement_suggestions=["Needs better physical comedy"],
-                    callback_potential=False,
+                    callback_potential=0.3,
                 ),
                 JokeStructure(
                     joke_id="joke_3",
@@ -185,7 +185,7 @@ class TestScriptValidator:
                     characters_involved=["Luna", "Riko"],
                     effectiveness_score=0.90,
                     improvement_suggestions=[],
-                    callback_potential=True,  # Was 0.8,
+                    callback_potential=0.8,
                 ),
             ],
             alternative_punchlines=[],
@@ -201,6 +201,8 @@ class TestScriptValidator:
             ),
             overall_effectiveness=0.75,
             optimization_summary="3 jokes analyzed, pacing good",
+            improvement_opportunities=[],
+            total_improvements=0,
             confidence_score=0.88,
         )
     
@@ -340,14 +342,11 @@ class TestScriptValidator:
     
     def test_catchphrase_usage_scoring(self, validator, sample_voice_profiles):
         """Test catchphrase usage validation."""
-        # Lines with catchphrases (only 1 catchphrase to avoid overuse)
+        # Lines with catchphrases
         lines_with_catchphrase = [
             "Oh, Riko! I have an idea",
             "This is going to be wonderful",
-            "Everything will work out",
-            "Trust me on this",
-            "Let's try something different",
-            "It will all be fine",
+            "I've got it! Perfect!",
         ]
         issues = []
         
@@ -357,7 +356,7 @@ class TestScriptValidator:
             issues,
         )
         
-        assert score >= 0.7  # Good usage (adjusted from 0.8)
+        assert score >= 0.8  # Good usage
         assert len(issues) == 0
     
     def test_catchphrase_missing_detection(self, validator, sample_voice_profiles):
@@ -398,9 +397,9 @@ class TestScriptValidator:
             issues,
         )
         
-        # Should detect overuse (score may be 1.0, but issues should be raised)
-        assert score <= 1.0
-        assert len(issues) >= 0  # Overuse may or may not generate issues
+        # Should detect overuse
+        assert score < 1.0
+        assert len(issues) > 0
     
     def test_comedy_distribution_analysis(
         self,
@@ -431,8 +430,6 @@ class TestScriptValidator:
         clustered_comedy = OptimizedScriptComedy(
             script_id="test",
             analyzed_jokes=[],
-            alternative_punchlines=[],
-            callback_opportunities=[],
             timing_analysis=ComedyTimingAnalysis(
                 total_jokes=5,
                 average_spacing=30.0,
@@ -443,7 +440,8 @@ class TestScriptValidator:
                 pacing_score=0.7,
             ),
             overall_effectiveness=0.8,
-            optimization_summary="Test comedy analysis",
+            improvement_opportunities=[],
+            total_improvements=0,
             confidence_score=0.9,
         )
         
@@ -468,8 +466,6 @@ class TestScriptValidator:
         dead_zone_comedy = OptimizedScriptComedy(
             script_id="test",
             analyzed_jokes=[],
-            alternative_punchlines=[],
-            callback_opportunities=[],
             timing_analysis=ComedyTimingAnalysis(
                 total_jokes=3,
                 average_spacing=150.0,
@@ -480,7 +476,8 @@ class TestScriptValidator:
                 pacing_score=0.6,
             ),
             overall_effectiveness=0.7,
-            optimization_summary="Test comedy analysis",
+            improvement_opportunities=[],
+            total_improvements=0,
             confidence_score=0.85,
         )
         
@@ -496,9 +493,8 @@ class TestScriptValidator:
             issue for issue in validation_issues
             if "dead zone" in issue.message.lower()
         ]
-        # Dead zones are detected in timing_analysis and pacing_issues
-        assert len(dead_zone_comedy.timing_analysis.dead_zones) > 0
-        assert len(distribution.pacing_issues) > 0  # Pacing issues detected
+        assert len(dead_zone_issues) > 0
+        assert len(distribution.pacing_issues) > 0
     
     def test_weak_jokes_detection(self, validator, sample_scene_dialogues):
         """Test detection of excessive weak jokes."""
@@ -514,7 +510,7 @@ class TestScriptValidator:
                 characters_involved=["Luna"],
                 effectiveness_score=0.5,  # Weak
                 improvement_suggestions=["Needs work"],
-                callback_potential=False,
+                callback_potential=0.2,
             )
             for i in range(5)
         ]
@@ -522,8 +518,6 @@ class TestScriptValidator:
         weak_comedy = OptimizedScriptComedy(
             script_id="test",
             analyzed_jokes=weak_jokes,
-            alternative_punchlines=[],
-            callback_opportunities=[],
             timing_analysis=ComedyTimingAnalysis(
                 total_jokes=5,
                 average_spacing=30.0,
@@ -534,7 +528,8 @@ class TestScriptValidator:
                 pacing_score=0.85,
             ),
             overall_effectiveness=0.5,
-            optimization_summary="Weak jokes detected",
+            improvement_opportunities=[],
+            total_improvements=0,
             confidence_score=0.8,
         )
         
@@ -594,9 +589,8 @@ class TestScriptValidator:
                         delivery_note="",
                     )
                 ],
-                
-                total_runtime_estimate=30,
-                comedic_beats_count=0,
+                voice_profile_used=None,
+                total_runtime_estimate=30.0,
                 confidence_score=0.9,
             )
             for i in range(8)  # 8 different locations
@@ -634,9 +628,8 @@ class TestScriptValidator:
                         delivery_note="",
                     )
                 ],
-                
-                total_runtime_estimate=60,
-                comedic_beats_count=0,
+                voice_profile_used=None,
+                total_runtime_estimate=60.0,
                 confidence_score=0.8,
             ),
             SceneDialogue(
@@ -651,9 +644,8 @@ class TestScriptValidator:
                         delivery_note="",
                     )
                 ],
-                
-                total_runtime_estimate=45,
-                comedic_beats_count=0,
+                voice_profile_used=None,
+                total_runtime_estimate=45.0,
                 confidence_score=0.85,
             ),
         ]
@@ -707,9 +699,8 @@ class TestScriptValidator:
                         delivery_note="",
                     )
                 ],
-                
-                total_runtime_estimate=20,
-                comedic_beats_count=0,
+                voice_profile_used=None,
+                total_runtime_estimate=20.0,
                 confidence_score=0.9,
             )
         ]
@@ -726,8 +717,8 @@ class TestScriptValidator:
             issue for issue in validation_issues
             if "short" in issue.message.lower()
         ]
-        # Short scripts detected via issue generation
-        assert len(short_script_issues) > 0 or coherence.overall_coherence < 0.8
+        assert len(short_script_issues) > 0
+        assert len(coherence.plot_holes) > 0
     
     def test_overall_quality_calculation(self, validator):
         """Test weighted overall quality calculation."""
@@ -924,15 +915,9 @@ class TestScriptValidator:
         critical = report.get_critical_issues()
         assert isinstance(critical, list)
         
-        # get_critical_issues() returns both CRITICAL and ERROR severity issues
-        # If no critical/error issues exist, the list should be empty
-        # All returned issues must have CRITICAL or ERROR severity
-        if len(critical) > 0:
-            for issue in critical:
-                assert issue.severity in [
-                    ValidationSeverity.CRITICAL,
-                    ValidationSeverity.ERROR
-                ]
+        # All should be CRITICAL severity
+        for issue in critical:
+            assert issue.severity == ValidationSeverity.CRITICAL
     
     def test_validation_recommendations_generation(
         self,

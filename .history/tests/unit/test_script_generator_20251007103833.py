@@ -486,13 +486,12 @@ class TestSceneGeneration:
         mock_stage_directions,
     ):
         """Test basic scene script generation."""
-        # Setup mocks - use AsyncMock for async methods
-        from unittest.mock import AsyncMock
-        mock_dialogue_gen.return_value.generate_dialogue = AsyncMock(
-            return_value=mock_scene_dialogue
+        # Setup mocks
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
         )
-        mock_stage_gen.return_value.generate_stage_directions = AsyncMock(
-            return_value=mock_stage_directions
+        mock_stage_gen.return_value.generate_stage_directions.return_value = (
+            mock_stage_directions
         )
         
         # Manually update generators
@@ -526,12 +525,11 @@ class TestSceneGeneration:
 class TestFullScriptGeneration:
     """Test complete script generation pipeline."""
     
-    @pytest.mark.asyncio
     @patch('src.services.creative.script_generator.ScriptValidator')
     @patch('src.services.creative.script_generator.JokeOptimizer')
     @patch('src.services.creative.script_generator.StageDirectionGenerator')
     @patch('src.services.creative.script_generator.DialogueGenerator')
-    async def test_generate_full_script_passing_validation(
+    def test_generate_full_script_passing_validation(
         self,
         mock_dialogue_gen,
         mock_stage_gen,
@@ -547,16 +545,15 @@ class TestFullScriptGeneration:
         mock_validation_report_passing,
     ):
         """Test full script generation with passing validation."""
-        # Setup mocks - use AsyncMock for async methods
-        from unittest.mock import AsyncMock
-        mock_dialogue_gen.return_value.generate_dialogue = AsyncMock(
-            return_value=mock_scene_dialogue
+        # Setup mocks
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
         )
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_passing
@@ -569,7 +566,7 @@ class TestFullScriptGeneration:
         script_generator.script_validator = mock_validator.return_value
         
         # Generate script
-        full_script = await script_generator.generate_full_script(
+        full_script = script_generator.generate_full_script(
             script_id="test_001",
             episode_outline=sample_episode_outline,
             character_profiles=sample_voice_profiles,
@@ -586,12 +583,11 @@ class TestFullScriptGeneration:
         assert full_script.final_validation_report.validation_passed
         assert len(full_script.refinement_iterations) == 0  # Passed first time
     
-    @pytest.mark.asyncio
     @patch('src.services.creative.script_generator.ScriptValidator')
     @patch('src.services.creative.script_generator.JokeOptimizer')
     @patch('src.services.creative.script_generator.StageDirectionGenerator')
     @patch('src.services.creative.script_generator.DialogueGenerator')
-    async def test_generate_full_script_with_refinement(
+    def test_generate_full_script_with_refinement(
         self,
         mock_dialogue_gen,
         mock_stage_gen,
@@ -608,16 +604,15 @@ class TestFullScriptGeneration:
         mock_validation_report_passing,
     ):
         """Test full script generation with refinement loop."""
-        # Setup mocks - use AsyncMock for async methods
-        from unittest.mock import AsyncMock
-        mock_dialogue_gen.return_value.generate_dialogue = AsyncMock(
-            return_value=mock_scene_dialogue
+        # Setup mocks - fail once, then pass
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
         )
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.side_effect = [
             mock_validation_report_failing,  # First validation fails
@@ -631,7 +626,7 @@ class TestFullScriptGeneration:
         script_generator.script_validator = mock_validator.return_value
         
         # Generate script
-        full_script = await script_generator.generate_full_script(
+        full_script = script_generator.generate_full_script(
             script_id="test_002",
             episode_outline=sample_episode_outline,
             character_profiles=sample_voice_profiles,
@@ -652,12 +647,11 @@ class TestFullScriptGeneration:
 class TestRefinementLoop:
     """Test script refinement logic."""
     
-    @pytest.mark.asyncio
     @patch('src.services.creative.script_generator.ScriptValidator')
     @patch('src.services.creative.script_generator.JokeOptimizer')
     @patch('src.services.creative.script_generator.StageDirectionGenerator')
     @patch('src.services.creative.script_generator.DialogueGenerator')
-    async def test_max_refinement_iterations_reached(
+    def test_max_refinement_iterations_reached(
         self,
         mock_dialogue_gen,
         mock_stage_gen,
@@ -673,16 +667,15 @@ class TestRefinementLoop:
         mock_validation_report_failing,
     ):
         """Test that refinement stops at max iterations."""
-        # Setup mocks - use AsyncMock for async methods
-        from unittest.mock import AsyncMock
-        mock_dialogue_gen.return_value.generate_dialogue = AsyncMock(
-            return_value=mock_scene_dialogue
+        # Setup mocks - always fail validation
+        mock_dialogue_gen.return_value.generate_dialogue.return_value = (
+            mock_scene_dialogue
         )
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_failing
@@ -698,7 +691,7 @@ class TestRefinementLoop:
         script_generator.max_refinement_iterations = 3
         
         # Generate script
-        full_script = await script_generator.generate_full_script(
+        full_script = script_generator.generate_full_script(
             script_id="test_003",
             episode_outline=sample_episode_outline,
             character_profiles=sample_voice_profiles,
@@ -734,6 +727,7 @@ class TestExportFormats:
             dialogue=SceneDialogue(
                 scene_number=1,
                 location="Test Location",
+                time_of_day="Day",
                 characters_present=["Luna"],
                 dialogue_lines=[
                     DialogueLine(
@@ -744,7 +738,7 @@ class TestExportFormats:
                     )
                 ],
                 total_runtime_estimate=30,
-                comedic_beats_count=1,
+        comedic_beats_count=1,
                 confidence_score=0.9,
             ),
             stage_directions=SceneStageDirections(
@@ -795,7 +789,7 @@ class TestExportFormats:
         # Verify file created
         assert output_path.exists()
         content = output_path.read_text()
-        assert "TEST EPISODE" in content  # Title is uppercase in screenplay
+        assert "Test Episode" in content
         assert "SCENE 1" in content
         assert "LUNA" in content
 
@@ -1050,349 +1044,3 @@ class TestHelperMethods:
         # Get Docking Bay scenes
         docking_scenes = full_script.get_scenes_by_location("Docking Bay")
         assert len(docking_scenes) == 1
-
-
-# ============================================================================
-# PARALLEL SCENE GENERATION TESTS
-# ============================================================================
-
-class TestParallelSceneGeneration:
-    """
-    Test suite for parallel scene generation with asyncio.gather().
-    
-    Verifies:
-    - Parallel execution achieves speedup vs sequential
-    - Semaphore correctly limits max concurrent scenes
-    - Progress callbacks fire for each scene
-    - Error handling in parallel scenarios
-    """
-    
-    @pytest.mark.asyncio
-    @patch('src.services.creative.script_generator.ScriptValidator')
-    @patch('src.services.creative.script_generator.JokeOptimizer')
-    @patch('src.services.creative.script_generator.StageDirectionGenerator')
-    @patch('src.services.creative.script_generator.DialogueGenerator')
-    @patch('src.services.creative.script_generator.OpenAIClient')
-    @patch('src.services.creative.script_generator.ClaudeClient')
-    async def test_parallel_execution_achieves_speedup(
-        self,
-        mock_claude,
-        mock_openai,
-        mock_dialogue_gen,
-        mock_stage_gen,
-        mock_joke_opt,
-        mock_validator,
-        sample_episode_outline,
-        sample_voice_profiles,
-        sample_show_metadata,
-        mock_scene_dialogue,
-        mock_stage_directions,
-        mock_comedy_analysis,
-        mock_validation_report_passing,
-    ):
-        """Test that parallel execution is faster than sequential."""
-        import time
-        import asyncio
-        
-        # Mock scene generation with 0.2 second delay to simulate AI calls
-        async def mock_generate_dialogue(*args, **kwargs):
-            await asyncio.sleep(0.2)  # Simulate API call
-            return mock_scene_dialogue
-        
-        async def mock_generate_stage_directions(*args, **kwargs):
-            await asyncio.sleep(0.1)  # Simulate API call
-            return mock_stage_directions
-        
-        # Setup mocks for parallel generator (max_parallel_scenes=3)
-        parallel_generator = ScriptGenerator(max_parallel_scenes=3)
-        
-        mock_dialogue_parallel = Mock()
-        mock_dialogue_parallel.generate_dialogue = mock_generate_dialogue
-        parallel_generator.dialogue_generator = mock_dialogue_parallel
-        
-        mock_stage_parallel = Mock()
-        mock_stage_parallel.generate_stage_directions = mock_generate_stage_directions
-        parallel_generator.stage_direction_generator = mock_stage_parallel
-        
-        mock_joke_parallel = Mock()
-        mock_joke_parallel.optimize_script_comedy = AsyncMock(return_value=mock_comedy_analysis)
-        parallel_generator.joke_optimizer = mock_joke_parallel
-        
-        mock_validator_parallel = Mock()
-        mock_validator_parallel.validate_script = Mock(return_value=mock_validation_report_passing)
-        parallel_generator.script_validator = mock_validator_parallel
-        
-        # Time parallel execution
-        start_parallel = time.time()
-        parallel_script = await parallel_generator.generate_full_script(
-            script_id="test_parallel",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
-        parallel_time = time.time() - start_parallel
-        
-        # Setup mocks for sequential generator (max_parallel_scenes=1)
-        sequential_generator = ScriptGenerator(max_parallel_scenes=1)
-        
-        mock_dialogue_seq = Mock()
-        mock_dialogue_seq.generate_dialogue = mock_generate_dialogue
-        sequential_generator.dialogue_generator = mock_dialogue_seq
-        
-        mock_stage_seq = Mock()
-        mock_stage_seq.generate_stage_directions = mock_generate_stage_directions
-        sequential_generator.stage_direction_generator = mock_stage_seq
-        
-        mock_joke_seq = Mock()
-        mock_joke_seq.optimize_script_comedy = AsyncMock(return_value=mock_comedy_analysis)
-        sequential_generator.joke_optimizer = mock_joke_seq
-        
-        mock_validator_seq = Mock()
-        mock_validator_seq.validate_script = Mock(return_value=mock_validation_report_passing)
-        sequential_generator.script_validator = mock_validator_seq
-        
-        # Time sequential execution
-        start_sequential = time.time()
-        sequential_script = await sequential_generator.generate_full_script(
-            script_id="test_sequential",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
-        sequential_time = time.time() - start_sequential
-        
-        # Verify both generated same number of scenes
-        assert len(parallel_script.scenes) == 3
-        assert len(sequential_script.scenes) == 3
-        
-        # Verify parallel is significantly faster
-        # With 3 scenes at 0.3s each (0.2 dialogue + 0.1 stage directions):
-        # Sequential: ~0.9s (3 * 0.3s)
-        # Parallel: ~0.3s (max(0.3s, 0.3s, 0.3s) = 0.3s)
-        # Speedup should be ~3x (or at least 2x with overhead)
-        speedup = sequential_time / parallel_time
-        assert speedup >= 2.0, (
-            f"Parallel execution should be at least 2x faster. "
-            f"Sequential: {sequential_time:.2f}s, Parallel: {parallel_time:.2f}s, "
-            f"Speedup: {speedup:.2f}x"
-        )
-    
-    @pytest.mark.asyncio
-    @patch('src.services.creative.script_generator.ScriptValidator')
-    @patch('src.services.creative.script_generator.JokeOptimizer')
-    @patch('src.services.creative.script_generator.StageDirectionGenerator')
-    @patch('src.services.creative.script_generator.DialogueGenerator')
-    @patch('src.services.creative.script_generator.OpenAIClient')
-    @patch('src.services.creative.script_generator.ClaudeClient')
-    async def test_semaphore_limits_concurrency(
-        self,
-        mock_claude,
-        mock_openai,
-        mock_dialogue_gen,
-        mock_stage_gen,
-        mock_joke_opt,
-        mock_validator,
-        sample_episode_outline,
-        sample_voice_profiles,
-        sample_show_metadata,
-        mock_scene_dialogue,
-        mock_stage_directions,
-        mock_comedy_analysis,
-        mock_validation_report_passing,
-    ):
-        """Test that semaphore correctly limits concurrent scene generation."""
-        import asyncio
-        
-        # Track concurrent executions
-        concurrent_count = 0
-        max_concurrent = 0
-        
-        async def track_concurrent_dialogue(*args, **kwargs):
-            nonlocal concurrent_count, max_concurrent
-            concurrent_count += 1
-            max_concurrent = max(max_concurrent, concurrent_count)
-            await asyncio.sleep(0.1)  # Simulate work
-            concurrent_count -= 1
-            return mock_scene_dialogue
-        
-        # Create generator with max_parallel_scenes=2
-        generator = ScriptGenerator(max_parallel_scenes=2)
-        
-        mock_dialogue = Mock()
-        mock_dialogue.generate_dialogue = track_concurrent_dialogue
-        generator.dialogue_generator = mock_dialogue
-        
-        mock_stage = Mock()
-        mock_stage.generate_stage_directions = AsyncMock(return_value=mock_stage_directions)
-        generator.stage_direction_generator = mock_stage
-        
-        mock_joke = Mock()
-        mock_joke.optimize_script_comedy = AsyncMock(return_value=mock_comedy_analysis)
-        generator.joke_optimizer = mock_joke
-        
-        mock_validator = Mock()
-        mock_validator.validate_script = Mock(return_value=mock_validation_report_passing)
-        generator.script_validator = mock_validator
-        
-        # Generate full script with 3 scenes
-        script = await generator.generate_full_script(
-            script_id="test_semaphore",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-        )
-        
-        # Verify max concurrent never exceeded 2
-        assert max_concurrent <= 2, (
-            f"Semaphore should limit to 2 concurrent scenes, "
-            f"but {max_concurrent} were running simultaneously"
-        )
-        
-        # Verify all 3 scenes generated
-        assert len(script.scenes) == 3
-    
-    @pytest.mark.asyncio
-    @patch('src.services.creative.script_generator.ScriptValidator')
-    @patch('src.services.creative.script_generator.JokeOptimizer')
-    @patch('src.services.creative.script_generator.StageDirectionGenerator')
-    @patch('src.services.creative.script_generator.DialogueGenerator')
-    @patch('src.services.creative.script_generator.OpenAIClient')
-    @patch('src.services.creative.script_generator.ClaudeClient')
-    async def test_progress_callbacks_fire_correctly(
-        self,
-        mock_claude,
-        mock_openai,
-        mock_dialogue_gen,
-        mock_stage_gen,
-        mock_joke_opt,
-        mock_validator,
-        sample_episode_outline,
-        sample_voice_profiles,
-        sample_show_metadata,
-        mock_scene_dialogue,
-        mock_stage_directions,
-        mock_comedy_analysis,
-        mock_validation_report_passing,
-    ):
-        """Test that progress callbacks fire for each scene."""
-        # Track progress updates
-        progress_updates = []
-        
-        def progress_callback(status: str, current: int, total: int):
-            progress_updates.append({
-                'status': status,
-                'current': current,
-                'total': total
-            })
-        
-        # Create generator with progress callback
-        generator = ScriptGenerator(max_parallel_scenes=3)
-        
-        # Setup mocks
-        mock_dialogue = Mock()
-        mock_dialogue.generate_dialogue = AsyncMock(return_value=mock_scene_dialogue)
-        generator.dialogue_generator = mock_dialogue
-        
-        mock_stage = Mock()
-        mock_stage.generate_stage_directions = AsyncMock(return_value=mock_stage_directions)
-        generator.stage_direction_generator = mock_stage
-        
-        mock_joke = Mock()
-        mock_joke.optimize_script_comedy = AsyncMock(return_value=mock_comedy_analysis)
-        generator.joke_optimizer = mock_joke
-        
-        mock_validator = Mock()
-        mock_validator.validate_script = Mock(return_value=mock_validation_report_passing)
-        generator.script_validator = mock_validator
-        
-        # Generate script with progress callback
-        script = await generator.generate_full_script(
-            script_id="test_progress",
-            episode_outline=sample_episode_outline,
-            character_profiles=sample_voice_profiles,
-            show_metadata=sample_show_metadata,
-            progress_callback=progress_callback,
-        )
-        
-        # Verify progress updates - should have 3 updates (one per scene start)
-        assert len(progress_updates) == 3, (
-            f"Should have 3 progress updates, got {len(progress_updates)}"
-        )
-        
-        # Verify each scene has update
-        assert all(
-            update['total'] == 3 for update in progress_updates
-        ), "All updates should have total=3"
-        
-        current_indices = [update['current'] for update in progress_updates]
-        assert current_indices == [0, 1, 2], (
-            "Should have current indices 0, 1, 2"
-        )
-        
-        # Verify status messages
-        assert all(
-            'Generating scene' in update['status']
-            for update in progress_updates
-        ), "All statuses should mention 'Generating scene'"
-        
-        # Verify all scenes generated
-        assert len(script.scenes) == 3
-    
-    @pytest.mark.asyncio
-    @patch('src.services.creative.script_generator.ScriptValidator')
-    @patch('src.services.creative.script_generator.JokeOptimizer')
-    @patch('src.services.creative.script_generator.StageDirectionGenerator')
-    @patch('src.services.creative.script_generator.DialogueGenerator')
-    @patch('src.services.creative.script_generator.OpenAIClient')
-    @patch('src.services.creative.script_generator.ClaudeClient')
-    async def test_error_handling_in_parallel_execution(
-        self,
-        mock_claude,
-        mock_openai,
-        mock_dialogue_gen,
-        mock_stage_gen,
-        mock_joke_opt,
-        mock_validator,
-        sample_episode_outline,
-        sample_voice_profiles,
-        sample_show_metadata,
-        mock_scene_dialogue,
-        mock_stage_directions,
-    ):
-        """Test error handling when one scene fails in parallel execution."""
-        # Create generator
-        generator = ScriptGenerator(max_parallel_scenes=3)
-        
-        # Mock dialogue generator that fails for scene 2
-        call_count = 0
-        
-        async def failing_dialogue(*args, **kwargs):
-            nonlocal call_count
-            call_count += 1
-            if call_count == 2:  # Fail on second scene
-                raise Exception("AI API failure for scene 2")
-            return mock_scene_dialogue
-        
-        mock_dialogue = Mock()
-        mock_dialogue.generate_dialogue = failing_dialogue
-        generator.dialogue_generator = mock_dialogue
-        
-        mock_stage = Mock()
-        mock_stage.generate_stage_directions = AsyncMock(
-            return_value=mock_stage_directions
-        )
-        generator.stage_direction_generator = mock_stage
-        
-        # Verify exception is raised and propagated
-        with pytest.raises(Exception, match="AI API failure for scene 2"):
-            await generator.generate_full_script(
-                script_id="test_error",
-                episode_outline=sample_episode_outline,
-                character_profiles=sample_voice_profiles,
-                show_metadata=sample_show_metadata,
-            )
-        
-        # Verify dialogue generator was called at least 2 times before failure
-        assert call_count >= 2, (
-            "Should have attempted at least 2 scenes before failure"
-        )

@@ -83,11 +83,10 @@ class SceneScript:
             # Dialogue
             lines.append(f"{dialogue_line.line}\n")
         
-        # Final stage directions (after all dialogue)
-        for direction in self.stage_directions.action_beats:
-            # Note: action_beats don't have timing_in_scene, 
-            # this was incorrect logic from before
-            lines.append(f"\n{direction.description}\n")
+        # Final stage directions
+        for direction in self.stage_directions.action_descriptions:
+            if direction.timing_in_scene >= self.dialogue.total_runtime_estimate:
+                lines.append(f"\n{direction.action_description}\n")
         
         return "".join(lines)
     

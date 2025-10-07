@@ -208,7 +208,7 @@ class ScriptGenerator:
         
         # Optimize comedy across all scenes
         logger.info("Optimizing comedy timing and effectiveness...")
-        comedy_analysis = await self.joke_optimizer.optimize_script_comedy(
+        comedy_analysis = self.joke_optimizer.optimize_script_comedy(
             all_dialogues, character_profiles
         )
         
@@ -264,7 +264,7 @@ class ScriptGenerator:
             )
             
             # Attempt refinement
-            scene_scripts, comedy_analysis = await self._refine_script(
+            scene_scripts, comedy_analysis = self._refine_script(
                 scene_scripts,
                 character_profiles,
                 validation_report,
@@ -458,7 +458,7 @@ class ScriptGenerator:
             production_notes=production_notes,
         )
     
-    async def _refine_script(
+    def _refine_script(
         self,
         scene_scripts: List[SceneScript],
         character_profiles: Dict[str, CharacterVoiceProfile],
@@ -491,7 +491,7 @@ class ScriptGenerator:
         
         # Re-optimize comedy (which may improve weak jokes)
         all_dialogues = [scene.dialogue for scene in scene_scripts]
-        comedy_analysis = await self.joke_optimizer.optimize_script_comedy(
+        comedy_analysis = self.joke_optimizer.optimize_script_comedy(
             all_dialogues, character_profiles
         )
         

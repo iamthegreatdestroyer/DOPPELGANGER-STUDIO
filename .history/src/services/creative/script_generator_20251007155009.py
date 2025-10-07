@@ -264,7 +264,7 @@ class ScriptGenerator:
             )
             
             # Attempt refinement
-            scene_scripts, comedy_analysis = await self._refine_script(
+            scene_scripts, comedy_analysis = self._refine_script(
                 scene_scripts,
                 character_profiles,
                 validation_report,

@@ -555,8 +555,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_passing
@@ -616,8 +616,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.side_effect = [
             mock_validation_report_failing,  # First validation fails
@@ -681,8 +681,8 @@ class TestRefinementLoop:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_failing
@@ -1365,7 +1365,6 @@ class TestParallelSceneGeneration:
         
         # Mock dialogue generator that fails for scene 2
         call_count = 0
-        
         async def failing_dialogue(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -1378,9 +1377,7 @@ class TestParallelSceneGeneration:
         generator.dialogue_generator = mock_dialogue
         
         mock_stage = Mock()
-        mock_stage.generate_stage_directions = AsyncMock(
-            return_value=mock_stage_directions
-        )
+        mock_stage.generate_stage_directions = AsyncMock(return_value=mock_stage_directions)
         generator.stage_direction_generator = mock_stage
         
         # Verify exception is raised and propagated
@@ -1393,6 +1390,4 @@ class TestParallelSceneGeneration:
             )
         
         # Verify dialogue generator was called at least 2 times before failure
-        assert call_count >= 2, (
-            "Should have attempted at least 2 scenes before failure"
-        )
+        assert call_count >= 2, "Should have attempted at least 2 scenes before failure"

@@ -924,15 +924,12 @@ class TestScriptValidator:
         critical = report.get_critical_issues()
         assert isinstance(critical, list)
         
-        # get_critical_issues() returns both CRITICAL and ERROR severity issues
-        # If no critical/error issues exist, the list should be empty
-        # All returned issues must have CRITICAL or ERROR severity
+        # get_critical_issues() should return issues with CRITICAL severity
+        # If no CRITICAL issues exist, the list should be empty
+        # All returned issues must have CRITICAL severity
         if len(critical) > 0:
             for issue in critical:
-                assert issue.severity in [
-                    ValidationSeverity.CRITICAL,
-                    ValidationSeverity.ERROR
-                ]
+                assert issue.severity == ValidationSeverity.CRITICAL
     
     def test_validation_recommendations_generation(
         self,

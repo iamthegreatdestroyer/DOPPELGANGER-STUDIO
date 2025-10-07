@@ -555,8 +555,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_passing
@@ -616,8 +616,8 @@ class TestFullScriptGeneration:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.side_effect = [
             mock_validation_report_failing,  # First validation fails
@@ -681,8 +681,8 @@ class TestRefinementLoop:
         mock_stage_gen.return_value.generate_stage_directions.return_value = (
             mock_stage_directions
         )
-        mock_joke_opt.return_value.optimize_script_comedy = AsyncMock(
-            return_value=mock_comedy_analysis
+        mock_joke_opt.return_value.optimize_script_comedy.return_value = (
+            mock_comedy_analysis
         )
         mock_validator.return_value.validate_script.return_value = (
             mock_validation_report_failing
