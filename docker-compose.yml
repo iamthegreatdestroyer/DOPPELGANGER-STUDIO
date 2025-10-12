@@ -1,130 +1,117 @@
-# DOPPELGANGER STUDIO - Docker Compose Configuration
-# Full stack deployment with all services
-
-version: "3.8"
+version: '3.8'
 
 services:
-  # Main Application
+  # Main application
   app:
     build:
       context: .
-      dockerfile: docker/app/Dockerfile
-    container_name: doppelganger_app
+      dockerfile: Dockerfile
+    container_name: doppelganger-app
     ports:
       - "8000:8000"
     environment:
+      - ENVIRONMENT=development
       - POSTGRES_HOST=postgres
-      - MONGODB_HOST=mongodb
-      - REDIS_HOST=redis
-      - PYTHONUNBUFFERED=1
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=doppelganger
+      - POSTGRES_USER=doppelganger_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - MONGODB_URI=mongodb://mongo:27017/doppelganger
+      - REDIS_URL=redis://redis:6379/0
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_started
     volumes:
       - ./src:/app/src
-      - ./config:/app/config
       - ./data:/app/data
-      - ./assets:/app/assets
-      - ./logs:/app/logs
-    depends_on:
-      - postgres
-      - mongodb
-      - redis
     networks:
-      - doppelganger_network
+      - doppelganger-network
     restart: unless-stopped
 
-  # Background Worker
-  worker:
-    build:
-      context: .
-      dockerfile: docker/worker/Dockerfile
-    container_name: doppelganger_worker
-    environment:
-      - POSTGRES_HOST=postgres
-      - MONGODB_HOST=mongodb
-      - REDIS_HOST=redis
-    volumes:
-      - ./src:/app/src
-      - ./config:/app/config
-      - ./data:/app/data
-      - ./assets:/app/assets
-    depends_on:
-      - postgres
-      - mongodb
-      - redis
-    networks:
-      - doppelganger_network
-    restart: unless-stopped
-
-  # PostgreSQL Database
+  # PostgreSQL database
   postgres:
     image: postgres:15-alpine
-    container_name: doppelganger_postgres
+    container_name: doppelganger-postgres
     environment:
       - POSTGRES_DB=doppelganger
-      - POSTGRES_USER=doppelganger
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./data/databases/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+      - POSTGRES_USER=doppelganger_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
-    networks:
-      - doppelganger_network
-    restart: unless-stopped
-
-  # MongoDB Database
-  mongodb:
-    image: mongo:6
-    container_name: doppelganger_mongodb
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=doppelganger
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
-      - MONGO_INITDB_DATABASE=doppelganger
     volumes:
-      - mongodb_data:/data/db
-      - ./data/databases/init-mongo.js:/docker-entrypoint-initdb.d/init.js
-    ports:
-      - "27017:27017"
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doppelganger_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - doppelganger_network
+      - doppelganger-network
     restart: unless-stopped
 
-  # Redis Cache
+  # Redis cache
   redis:
     image: redis:7-alpine
-    container_name: doppelganger_redis
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
+    container_name: doppelganger-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - doppelganger_network
+      - doppelganger-network
     restart: unless-stopped
 
-  # Nginx Reverse Proxy
-  nginx:
+  # MongoDB
+  mongo:
+    image: mongo:6
+    container_name: doppelganger-mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - doppelganger-network
+    restart: unless-stopped
+
+  # Monitoring dashboard
+  dashboard:
     build:
       context: .
-      dockerfile: docker/nginx/Dockerfile
-    container_name: doppelganger_nginx
+      dockerfile: Dockerfile.dashboard
+    container_name: doppelganger-dashboard
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - nginx_logs:/var/log/nginx
+      - "3000:3000"
+    environment:
+      - APP_HOST=app
+      - APP_PORT=8000
     depends_on:
       - app
     networks:
-      - doppelganger_network
+      - doppelganger-network
     restart: unless-stopped
 
-networks:
-  doppelganger_network:
-    driver: bridge
-
 volumes:
-  postgres_data:
-  mongodb_data:
-  redis_data:
-  nginx_logs:
+  postgres-data:
+  redis-data:
+  mongo-data:
+
+networks:
+  doppelganger-network:
+    driver: bridge
