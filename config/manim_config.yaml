@@ -1,0 +1,64 @@
+# Manim Configuration for DOPPELGANGER STUDIO
+# Animation rendering settings and quality presets
+
+manim:
+  # Quality presets
+  quality:
+    preview:
+      resolution: [854, 480]
+      fps: 15
+      description: "Fast preview - for testing"
+    
+    low:
+      resolution: [854, 480]
+      fps: 30
+      description: "Draft quality - quick renders"
+    
+    medium:
+      resolution: [1920, 1080]
+      fps: 30
+      description: "Standard quality - production default"
+    
+    high:
+      resolution: [1920, 1080]
+      fps: 60
+      description: "High quality - final renders"
+  
+  # Output settings
+  output:
+    directory: "output/animations"
+    format: "mp4"
+    codec: "libx264"
+    crf: 18  # Quality (lower = better, 18-23 recommended)
+    
+  # Scene defaults
+  scene:
+    background_color: "#FFFFFF"  # White background
+    frame_rate: 30
+    pixel_height: 1080
+    pixel_width: 1920
+    
+  # Rendering settings
+  rendering:
+    workers: 4  # Parallel rendering workers
+    preview: false  # Auto-open preview
+    leave_progress_bars: true
+    
+  # Video encoding
+  encoding:
+    video_codec: "libx264"
+    audio_codec: "aac"
+    audio_bitrate: "192k"
+    video_bitrate: "5000k"
+    
+  # Cache settings
+  cache:
+    enable: true
+    directory: ".manim_cache"
+    
+  # Logging
+  logging:
+    level: "INFO"
+    file: "logs/manim_rendering.log"
+
+# Copyright (c) 2025. All Rights Reserved. Patent Pending.
