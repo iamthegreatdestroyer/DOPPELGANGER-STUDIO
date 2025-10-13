@@ -1,18 +1,17 @@
 """
-Research Service - TV show data gathering and analysis.
+Research Services Package - TV show data collection and caching.
 
-This service coordinates multiple data sources to build comprehensive
-research profiles for classic TV shows.
+Provides scrapers for Wikipedia, TMDB, and IMDB with PostgreSQL caching.
 
 Copyright (c) 2025. All Rights Reserved. Patent Pending.
 """
 
-from .wikipedia_scraper import WikipediaResearchScraper, WikipediaShowData
-from .tmdb_scraper import TMDBResearchScraper, TMDBShowData
+from src.services.research.wikipedia_scraper import WikipediaResearchScraper
+from src.services.research.tmdb_scraper import TMDBResearchScraper
+from src.services.research.postgres_cache import PostgresResearchCache
 
 __all__ = [
     'WikipediaResearchScraper',
-    'WikipediaShowData',
     'TMDBResearchScraper',
-    'TMDBShowData',
+    'PostgresResearchCache',
 ]
