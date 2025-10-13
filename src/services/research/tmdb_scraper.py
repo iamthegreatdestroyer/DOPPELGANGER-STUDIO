@@ -2,70 +2,69 @@
 TMDB Research Scraper - Extract TV show data from The Movie Database.
 
 Provides structured data including cast, crew, episode information,
-ratings, and production details.
+ratings, and production details via official TMDB API.
 
 Copyright (c) 2025. All Rights Reserved. Patent Pending.
 """
 
-from typing import Dict, List, Optional
+from typing import Optional, List, Dict
 import asyncio
 import aiohttp
 import logging
-from dataclasses import dataclass, field
+import os
 from datetime import datetime
 
+from src.models.research import TMDBData, CastMember, SeasonData
+
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class TMDBShowData:
-    """Container for TMDB-sourced show data."""
-    tmdb_id: int
-    title: str
-    original_title: str
-    overview: str
-    first_air_date: Optional[str] = None
-    last_air_date: Optional[str] = None
-    status: Optional[str] = None
-    vote_average: float = 0.0
-    vote_count: int = 0
-    popularity: float = 0.0
-    genres: List[str] = field(default_factory=list)
-    networks: List[str] = field(default_factory=list)
-    creators: List[Dict] = field(default_factory=list)
-    cast: List[Dict] = field(default_factory=list)
-    episode_count: int = 0
-    season_count: int = 0
-    seasons: List[Dict] = field(default_factory=list)
-    poster_path: Optional[str] = None
-    backdrop_path: Optional[str] = None
-    scraped_at: datetime = field(default_factory=datetime.now)
 
 
 class TMDBResearchScraper:
     """
     Scrapes The Movie Database (TMDB) for TV show information.
     
-    Requires TMDB API key (free from themoviedb.org).
-    Enhanced with Redis-based rate limiting (40 requests per 10 seconds).
+    Features:
+    - Official TMDB API integration
+    - Async operations for performance
+    - Rate limiting (40 requests/10 seconds)
+    - Automatic retry on rate limit
+    - Comprehensive error handling
+    - Image URL generation
+    
+    Requires:
+        TMDB API key from themoviedb.org (free tier)
+        
+    Example:
+        >>> api_key = os.getenv('TMDB_API_KEY')
+        >>> async with TMDBResearchScraper(api_key) as scraper:
+        ...     data = await scraper.research_show("I Love Lucy")
+        ...     print(f"Rating: {data.vote_average}/10")
     """
     
     BASE_URL = "https://api.themoviedb.org/3"
     IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original"
-    RATE_LIMIT_WINDOW = 10  # seconds
-    RATE_LIMIT_MAX = 40  # requests per window
     
-    def __init__(self, api_key: str, redis_client=None):
+    def __init__(self, api_key: Optional[str] = None):
         """
         Initialize TMDB scraper.
         
         Args:
-            api_key: TMDB API key from themoviedb.org
-            redis_client: Redis client from DatabaseManager for rate limiting
+            api_key: TMDB API key. If None, loads from TMDB_API_KEY env var
+            
+        Raises:
+            ValueError: If API key not provided and not in environment
         """
-        self.api_key = api_key
-        self.redis = redis_client
+        self.api_key = api_key or os.getenv('TMDB_API_KEY')
+        if not self.api_key:
+            raise ValueError(
+                "TMDB API key required. Set TMDB_API_KEY environment variable "
+                "or pass api_key parameter. Get free key at themoviedb.org"
+            )
+        
         self.session: Optional[aiohttp.ClientSession] = None
+        self._request_times: List[float] = []
+        self._rate_limit_window = 10.0  # 10 seconds
+        self._rate_limit_max = 40  # 40 requests per window
     
     async def __aenter__(self):
         """Async context manager entry."""
@@ -77,7 +76,35 @@ class TMDBResearchScraper:
         if self.session:
             await self.session.close()
     
-    async def research_show(self, show_title: str) -> TMDBShowData:
+    async def _respect_rate_limit(self):
+        """
+        Ensure we respect TMDB's rate limits (40 requests/10 seconds).
+        
+        Uses sliding window algorithm to track requests.
+        """
+        import time
+        current_time = time.time()
+        
+        # Remove requests outside the window
+        self._request_times = [
+            t for t in self._request_times
+            if current_time - t < self._rate_limit_window
+        ]
+        
+        # If at limit, wait until oldest request expires
+        if len(self._request_times) >= self._rate_limit_max:
+            oldest = self._request_times[0]
+            sleep_time = self._rate_limit_window - (current_time - oldest) + 0.1
+            if sleep_time > 0:
+                logger.debug(f"Rate limit reached, sleeping {sleep_time:.2f}s")
+                await asyncio.sleep(sleep_time)
+                # Refresh current time after sleep
+                current_time = time.time()
+        
+        # Record this request
+        self._request_times.append(current_time)
+    
+    async def research_show(self, show_title: str) -> TMDBData:
         """
         Research a TV show using TMDB API.
         
@@ -85,13 +112,16 @@ class TMDBResearchScraper:
             show_title: Name of the TV show
             
         Returns:
-            TMDBShowData with comprehensive information
+            TMDBData with comprehensive information
+            
+        Raises:
+            ValueError: If show not found on TMDB
+            aiohttp.ClientError: If API request fails
             
         Example:
-            >>> scraper = TMDBResearchScraper(api_key="your_key")
-            >>> async with scraper:
+            >>> async with TMDBResearchScraper(api_key) as scraper:
             ...     data = await scraper.research_show("I Love Lucy")
-            ...     print(f"Rating: {data.vote_average}/10")
+            ...     print(f"Episodes: {data.episode_count}")
         """
         logger.info(f"Researching show on TMDB: {show_title}")
         
@@ -110,11 +140,25 @@ class TMDBResearchScraper:
         data = self._build_show_data(details, credits)
         
         logger.info(f"TMDB research complete: {data.title}")
+        logger.debug(f"Found {len(data.cast)} cast members, {data.season_count} seasons")
         
         return data
     
     async def _search_show(self, query: str) -> Optional[int]:
-        """Search for a TV show and return its TMDB ID."""
+        """
+        Search for a TV show and return its TMDB ID.
+        
+        Args:
+            query: Show title to search for
+            
+        Returns:
+            TMDB ID if found, None otherwise
+        """
+        if not self.session:
+            raise RuntimeError("Session not initialized. Use 'async with' context manager")
+        
+        await self._respect_rate_limit()
+        
         url = f"{self.BASE_URL}/search/tv"
         params = {
             'api_key': self.api_key,
@@ -122,139 +166,147 @@ class TMDBResearchScraper:
             'page': 1
         }
         
-        data = await self._make_request(url, params)
-        results = data.get('results', [])
-        
-        if not results:
-            return None
-        
-        # Return first result's ID
-        return results[0]['id']
+        try:
+            async with self.session.get(url, params=params) as response:
+                if response.status == 429:  # Rate limited
+                    logger.warning("Rate limited by TMDB, retrying...")
+                    await asyncio.sleep(10)
+                    return await self._search_show(query)  # Retry
+                
+                if response.status != 200:
+                    logger.error(f"TMDB search failed: {response.status}")
+                    return None
+                
+                data = await response.json()
+                results = data.get('results', [])
+                
+                if not results:
+                    logger.warning(f"No TMDB results for: {query}")
+                    return None
+                
+                # Return first result's ID
+                show_id = results[0]['id']
+                logger.info(f"Found TMDB ID {show_id} for '{query}'")
+                return show_id
+                
+        except aiohttp.ClientError as e:
+            logger.error(f"TMDB search error: {e}")
+            raise
     
     async def _get_show_details(self, show_id: int) -> Dict:
-        """Get detailed information about a show."""
+        """
+        Get detailed information about a show.
+        
+        Args:
+            show_id: TMDB show ID
+            
+        Returns:
+            Dict with show details
+            
+        Raises:
+            ValueError: If show details cannot be retrieved
+        """
+        if not self.session:
+            raise RuntimeError("Session not initialized")
+        
+        await self._respect_rate_limit()
+        
         url = f"{self.BASE_URL}/tv/{show_id}"
         params = {
             'api_key': self.api_key,
             'append_to_response': 'content_ratings,external_ids'
         }
         
-        return await self._make_request(url, params)
+        try:
+            async with self.session.get(url, params=params) as response:
+                if response.status == 429:
+                    logger.warning("Rate limited, retrying...")
+                    await asyncio.sleep(10)
+                    return await self._get_show_details(show_id)
+                
+                if response.status != 200:
+                    raise ValueError(
+                        f"Failed to get show details: HTTP {response.status}"
+                    )
+                
+                return await response.json()
+                
+        except aiohttp.ClientError as e:
+            logger.error(f"Error fetching show details: {e}")
+            raise
     
     async def _get_credits(self, show_id: int) -> Dict:
-        """Get cast and crew information."""
-        url = f"{self.BASE_URL}/tv/{show_id}/credits"
-        params = {'api_key': self.api_key}
-        
-        try:
-            return await self._make_request(url, params)
-        except Exception as e:
-            logger.warning(f"Failed to get credits: {e}")
-            return {'cast': [], 'crew': []}
-    
-    async def _check_rate_limit(self) -> bool:
         """
-        Check if we're within rate limits using Redis.
-        
-        Returns:
-            True if request can proceed, False if rate limited
-        """
-        if not self.redis:
-            return True  # No Redis = no rate limiting (fallback)
-        
-        key = "ratelimit:tmdb:requests"
-        now = datetime.now().timestamp()
-        window_start = now - self.RATE_LIMIT_WINDOW
-        
-        try:
-            # Remove old entries outside window
-            await self.redis.zremrangebyscore(key, 0, window_start)
-            
-            # Count requests in current window
-            count = await self.redis.zcard(key)
-            
-            if count >= self.RATE_LIMIT_MAX:
-                # Get oldest entry in window
-                oldest = await self.redis.zrange(key, 0, 0, withscores=True)
-                if oldest:
-                    wait_time = (
-                        oldest[0][1] + self.RATE_LIMIT_WINDOW - now
-                    )
-                    logger.warning(
-                        f"TMDB rate limit reached, waiting {wait_time:.2f}s"
-                    )
-                    await asyncio.sleep(wait_time)
-                    # Recursive check after waiting
-                    return await self._check_rate_limit()
-            
-            # Add current request
-            await self.redis.zadd(key, {str(now): now})
-            await self.redis.expire(key, self.RATE_LIMIT_WINDOW * 2)
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Rate limit check failed: {e}")
-            return True  # Fail open
-    
-    async def _make_request(self, url: str, params: Dict) -> Dict:
-        """
-        Make API request with rate limiting and retry logic.
+        Get cast and crew information.
         
         Args:
-            url: API endpoint
-            params: Query parameters
+            show_id: TMDB show ID
             
         Returns:
-            JSON response
-            
-        Raises:
-            Exception if request fails after retries
+            Dict with cast and crew data
         """
         if not self.session:
             raise RuntimeError("Session not initialized")
         
-        max_retries = 3
-        retry_delay = 1.0  # Initial delay in seconds
+        await self._respect_rate_limit()
         
-        for attempt in range(max_retries):
-            # Check rate limit
-            await self._check_rate_limit()
-            
-            try:
-                async with self.session.get(url, params=params) as response:
-                    if response.status == 429:
-                        # Rate limited - exponential backoff
-                        wait_time = retry_delay * (2 ** attempt)
-                        logger.warning(
-                            f"TMDB rate limited, waiting {wait_time}s"
-                        )
-                        await asyncio.sleep(wait_time)
-                        continue
-                    
-                    if response.status == 200:
-                        return await response.json()
-                    
-                    # Other errors
-                    logger.error(f"TMDB API error {response.status}")
-                    if attempt == max_retries - 1:
-                        raise Exception(
-                            f"TMDB API failed: {response.status}"
-                        )
-                    
-                    await asyncio.sleep(retry_delay)
-                    
-            except asyncio.TimeoutError:
-                logger.error(f"TMDB timeout (attempt {attempt + 1})")
-                if attempt == max_retries - 1:
-                    raise
-                await asyncio.sleep(retry_delay)
+        url = f"{self.BASE_URL}/tv/{show_id}/credits"
+        params = {'api_key': self.api_key}
         
-        raise Exception("TMDB API request failed after retries")
+        try:
+            async with self.session.get(url, params=params) as response:
+                if response.status == 429:
+                    logger.warning("Rate limited, retrying...")
+                    await asyncio.sleep(10)
+                    return await self._get_credits(show_id)
+                
+                if response.status != 200:
+                    logger.warning(f"Failed to get credits: HTTP {response.status}")
+                    return {'cast': [], 'crew': []}
+                
+                return await response.json()
+                
+        except aiohttp.ClientError as e:
+            logger.warning(f"Error fetching credits: {e}")
+            return {'cast': [], 'crew': []}
     
-    def _build_show_data(self, details: Dict, credits: Dict) -> TMDBShowData:
-        """Build TMDBShowData from API responses."""
-        return TMDBShowData(
+    def _build_show_data(self, details: Dict, credits: Dict) -> TMDBData:
+        """
+        Build TMDBData from API responses.
+        
+        Args:
+            details: Show details from API
+            credits: Cast and crew from API
+            
+        Returns:
+            Complete TMDBData object
+        """
+        # Extract cast (top 15)
+        cast = [
+            CastMember(
+                name=actor['name'],
+                character=actor.get('character', ''),
+                order=actor.get('order', 999),
+                profile_path=self._build_image_url(actor.get('profile_path'))
+            )
+            for actor in credits.get('cast', [])[:15]
+        ]
+        
+        # Extract seasons
+        seasons = [
+            SeasonData(
+                season_number=s['season_number'],
+                episode_count=s['episode_count'],
+                name=s.get('name', f"Season {s['season_number']}"),
+                air_date=s.get('air_date'),
+                poster_path=self._build_image_url(s.get('poster_path'))
+            )
+            for s in details.get('seasons', [])
+            if s['season_number'] > 0  # Skip "Season 0" (specials)
+        ]
+        
+        # Build complete data object
+        return TMDBData(
             tmdb_id=details['id'],
             title=details['name'],
             original_title=details.get('original_name', details['name']),
@@ -274,30 +326,25 @@ class TMDBResearchScraper:
                 }
                 for c in details.get('created_by', [])
             ],
-            cast=[
-                {
-                    'name': actor['name'],
-                    'character': actor.get('character', ''),
-                    'order': actor.get('order', 999)
-                }
-                for actor in credits.get('cast', [])[:15]  # Top 15 cast
-            ],
+            cast=cast,
             episode_count=details.get('number_of_episodes', 0),
             season_count=details.get('number_of_seasons', 0),
-            seasons=[
-                {
-                    'season_number': s['season_number'],
-                    'episode_count': s['episode_count'],
-                    'name': s.get('name', f"Season {s['season_number']}")
-                }
-                for s in details.get('seasons', [])
-            ],
+            seasons=seasons,
             poster_path=self._build_image_url(details.get('poster_path')),
-            backdrop_path=self._build_image_url(details.get('backdrop_path'))
+            backdrop_path=self._build_image_url(details.get('backdrop_path')),
+            scraped_at=datetime.now()
         )
     
     def _build_image_url(self, path: Optional[str]) -> Optional[str]:
-        """Build full image URL from TMDB path."""
+        """
+        Build full image URL from TMDB path.
+        
+        Args:
+            path: TMDB image path (e.g., "/abc123.jpg")
+            
+        Returns:
+            Full URL or None if path is None
+        """
         if not path:
             return None
         return f"{self.IMAGE_BASE_URL}{path}"
@@ -306,21 +353,34 @@ class TMDBResearchScraper:
 # Example usage
 async def main():
     """Example usage of TMDB scraper."""
-    import os
-    
-    api_key = os.getenv('TMDB_API_KEY', 'your_key_here')
+    api_key = os.getenv('TMDB_API_KEY')
+    if not api_key:
+        print("Error: TMDB_API_KEY environment variable not set")
+        print("Get free API key at: https://www.themoviedb.org/settings/api")
+        return
     
     async with TMDBResearchScraper(api_key) as scraper:
-        data = await scraper.research_show("I Love Lucy")
-        
-        print(f"Title: {data.title}")
-        print(f"Years: {data.first_air_date} to {data.last_air_date}")
-        print(f"Rating: {data.vote_average}/10")
-        print(f"Seasons: {data.season_count}")
-        print(f"Episodes: {data.episode_count}")
-        print(f"\nTop Cast:")
-        for actor in data.cast[:5]:
-            print(f"  - {actor['name']} as {actor['character']}")
+        try:
+            data = await scraper.research_show("I Love Lucy")
+            
+            print(f"Title: {data.title}")
+            print(f"Years: {data.first_air_date} to {data.last_air_date}")
+            print(f"Status: {data.status}")
+            print(f"Rating: {data.vote_average}/10 ({data.vote_count} votes)")
+            print(f"Popularity: {data.popularity:.1f}")
+            print(f"Genres: {', '.join(data.genres)}")
+            print(f"Networks: {', '.join(data.networks)}")
+            print(f"Seasons: {data.season_count}")
+            print(f"Episodes: {data.episode_count}")
+            print(f"\nTop Cast:")
+            for actor in data.cast[:5]:
+                print(f"  - {actor.name} as {actor.character}")
+            print(f"\nOverview: {data.overview[:200]}...")
+            
+        except ValueError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
 
 if __name__ == "__main__":
