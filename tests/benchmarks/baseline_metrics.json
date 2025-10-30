@@ -1,0 +1,23 @@
+{
+  "single_scene_generation": {
+    "duration_sec": 0.11195111274719238,
+    "memory_mb": 138.45703125,
+    "cpu_percent": 0.0,
+    "success": true,
+    "timestamp": "2025-10-29T14:30:59.515840"
+  },
+  "three_scenes_sequential": {
+    "duration_sec": 0.3244285583496094,
+    "memory_mb": 138.46484375,
+    "cpu_percent": 0.0,
+    "success": true,
+    "timestamp": "2025-10-29T14:30:59.840486"
+  },
+  "three_scenes_parallel": {
+    "duration_sec": 0.10793304443359375,
+    "memory_mb": 138.4765625,
+    "cpu_percent": 0.0,
+    "success": true,
+    "timestamp": "2025-10-29T14:30:59.948648"
+  }
+}
