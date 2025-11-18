@@ -13,9 +13,11 @@ import logging
 
 try:
     from manim import *
+    from manim import VMobject  # Explicit import for test visibility
     MANIM_AVAILABLE = True
 except ImportError:
     MANIM_AVAILABLE = False
+    VMobject = None  # Fallback when Manim unavailable
 
 from src.models.character_visual import (
     CharacterVisual,
@@ -120,7 +122,7 @@ class CharacterSprite:
         """
         return self.mobject
     
-    def set_expression(self, expression: Expression) -> Animation:
+    def set_expression(self, expression: Expression) -> "Animation":
         """
         Change character expression.
         
@@ -168,7 +170,7 @@ class CharacterSprite:
         # Default: quick fade animation
         return FadeIn(self.mobject, run_time=0.2)
     
-    def move_to(self, position: Tuple[float, float], duration: float = 1.0) -> Animation:
+    def move_to(self, position: Tuple[float, float], duration: float = 1.0) -> "Animation":
         """
         Move character to new position.
         
@@ -204,7 +206,7 @@ class CharacterSprite:
         logger.debug(f"{self.visual.name} state: {self.state.value} -> {state.value}")
         self.state = state
     
-    def get_state_animation(self, duration: float = 1.0) -> Animation:
+    def get_state_animation(self, duration: float = 1.0) -> "Animation":
         """
         Get animation for current state.
         
@@ -247,7 +249,7 @@ class CharacterSprite:
             # Default: no animation
             return Wait(0.01)
     
-    def scale(self, factor: float) -> Animation:
+    def scale(self, factor: float) -> "Animation":
         """
         Scale character sprite.
         
@@ -260,7 +262,7 @@ class CharacterSprite:
         self.visual.scale *= factor
         return self.mobject.animate.scale(factor)
     
-    def fade_in(self, duration: float = 0.5) -> Animation:
+    def fade_in(self, duration: float = 0.5) -> "Animation":
         """
         Fade character in.
         
@@ -272,7 +274,7 @@ class CharacterSprite:
         """
         return FadeIn(self.mobject, run_time=duration)
     
-    def fade_out(self, duration: float = 0.5) -> Animation:
+    def fade_out(self, duration: float = 0.5) -> "Animation":
         """
         Fade character out.
         
@@ -284,7 +286,7 @@ class CharacterSprite:
         """
         return FadeOut(self.mobject, run_time=duration)
     
-    def enter_from(self, direction: str, duration: float = 1.0) -> Animation:
+    def enter_from(self, direction: str, duration: float = 1.0) -> "Animation":
         """
         Animate character entering from direction.
         
@@ -322,7 +324,7 @@ class CharacterSprite:
         # Animate to target
         return self.mobject.animate.move_to(target_pos).set_run_time(duration)
     
-    def exit_to(self, direction: str, duration: float = 1.0) -> Animation:
+    def exit_to(self, direction: str, duration: float = 1.0) -> "Animation":
         """
         Animate character exiting to direction.
         
@@ -431,7 +433,7 @@ class CharacterSpriteManager:
         character_names: List[str],
         spacing: float = 3.0,
         center: bool = True
-    ) -> List[Animation]:
+    ) -> List["Animation"]:
         """
         Position characters in a row.
         

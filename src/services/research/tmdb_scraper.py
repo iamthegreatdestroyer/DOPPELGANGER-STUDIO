@@ -16,6 +16,9 @@ from datetime import datetime
 
 from src.models.research import TMDBData, CastMember, SeasonData
 
+# Alias for backward compatibility
+TMDBShowData = TMDBData
+
 logger = logging.getLogger(__name__)
 
 

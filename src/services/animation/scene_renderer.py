@@ -122,7 +122,7 @@ class SceneRenderer:
     
     def _position_scene_characters(
         self,
-        scene: Scene,
+        scene: "Scene",
         characters: List[CharacterSprite]
     ):
         """
@@ -147,7 +147,7 @@ class SceneRenderer:
     
     def _render_dialogue(
         self,
-        scene: Scene,
+        scene: "Scene",
         dialogue: List[Tuple[str, str]],
         characters: List[CharacterSprite]
     ):

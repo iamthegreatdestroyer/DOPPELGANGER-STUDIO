@@ -13,10 +13,12 @@ from enum import Enum
 import logging
 
 try:
-    from manim import Animation
+    from manim import Animation, VMobject
     MANIM_AVAILABLE = True
 except ImportError:
     MANIM_AVAILABLE = False
+    Animation = None  # Fallback when Manim unavailable
+    VMobject = None
 
 logger = logging.getLogger(__name__)
 

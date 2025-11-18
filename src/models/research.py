@@ -62,6 +62,46 @@ class EpisodeData(BaseModel):
         }
 
 
+class CastMember(BaseModel):
+    """TMDB cast member information."""
+    name: str = Field(..., description="Actor/actress name")
+    character: str = Field(default="", description="Character name in show")
+    order: int = Field(default=999, description="Billing order in credits")
+    profile_path: Optional[str] = Field(None, description="Full URL to actor profile image")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "Lucille Ball",
+                "character": "Lucy Ricardo",
+                "order": 0,
+                "profile_path": "https://image.tmdb.org/t/p/w500/abc123.jpg"
+            }
+        }
+
+
+class SeasonData(BaseModel):
+    """TMDB season information."""
+    season_number: int = Field(..., ge=0, description="Season number (0 for specials)")
+    episode_count: int = Field(..., ge=0, description="Number of episodes in season")
+    name: str = Field(..., description="Season name")
+    overview: Optional[str] = Field(None, description="Season description")
+    air_date: Optional[str] = Field(None, description="Season premiere date")
+    poster_path: Optional[str] = Field(None, description="Full URL to season poster")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "season_number": 1,
+                "episode_count": 35,
+                "name": "Season 1",
+                "overview": "The first season of I Love Lucy",
+                "air_date": "1951-10-15",
+                "poster_path": "https://image.tmdb.org/t/p/w500/season1.jpg"
+            }
+        }
+
+
 class WikipediaData(BaseModel):
     """Data extracted from Wikipedia."""
     title: str = Field(..., description="Show title from Wikipedia")

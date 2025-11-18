@@ -18,6 +18,9 @@ from datetime import datetime
 
 from src.models.research import WikipediaData, CharacterData
 
+# Alias for backward compatibility with phase2 code
+WikipediaShowData = WikipediaData
+
 logger = logging.getLogger(__name__)
 
 

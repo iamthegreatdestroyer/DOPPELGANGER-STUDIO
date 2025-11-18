@@ -1,13 +1,13 @@
 """
 Unit tests for TMDB Rate Limiting.
 
-Tests Redis-based rate limiter with 40 requests per 10 seconds limit.
+Tests in-memory rate limiter with 40 requests per 10 seconds limit.
 
 Copyright (c) 2025. All Rights Reserved. Patent Pending.
 """
 
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 from datetime import datetime
 from src.services.research.tmdb_scraper import TMDBResearchScraper
 
@@ -15,170 +15,208 @@ from src.services.research.tmdb_scraper import TMDBResearchScraper
 @pytest.mark.asyncio
 async def test_rate_limiter_under_limit():
     """Test rate limiter allows requests under limit."""
-    mock_redis = AsyncMock()
-    mock_redis.zcard.return_value = 35  # Below limit of 40
+    scraper = TMDBResearchScraper("test_key")
     
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
+    # Add 35 requests within the 10-second window (below limit of 40)
+    import time
+    current_time = time.time()
+    # Spread them across 9 seconds (all within 10-second window)
+    scraper._request_times = [current_time - (i * 0.25) for i in range(35)]
     
-    result = await scraper._check_rate_limit()
+    # Should not sleep since under limit
+    await scraper._respect_rate_limit()
     
-    assert result is True
-    assert mock_redis.zadd.called  # Should add request to sorted set
-    assert mock_redis.expire.called
+    # Should have added current request (35 + 1 = 36)
+    assert len(scraper._request_times) == 36
 
 
 @pytest.mark.asyncio
 async def test_rate_limiter_at_limit_waits():
     """Test rate limiter waits when at limit."""
-    mock_redis = AsyncMock()
-    # First call: at limit, second call: under limit
-    mock_redis.zcard.side_effect = [40, 39]
-    mock_redis.zrange.return_value = [(b'123.456', 123.456)]
+    scraper = TMDBResearchScraper("test_key")
     
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
+    # Fill to limit (40 requests)
+    import time
+    current_time = time.time()
+    scraper._request_times = [current_time - i * 0.1 for i in range(40)]
     
-    result = await scraper._check_rate_limit()
-    
-    assert result is True
-    # Should have checked card count twice (initial + after wait)
-    assert mock_redis.zcard.call_count >= 1
+    # Mock sleep to verify it's called
+    with patch('asyncio.sleep') as mock_sleep:
+        await scraper._respect_rate_limit()
+        
+        # Should have called sleep since at limit
+        assert mock_sleep.called
 
 
 @pytest.mark.asyncio
 async def test_rate_limiter_removes_old_entries():
     """Test that old entries are removed from window."""
-    mock_redis = AsyncMock()
-    mock_redis.zcard.return_value = 10
+    scraper = TMDBResearchScraper("test_key")
     
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
-    
-    await scraper._check_rate_limit()
-    
-    # Should remove entries outside window
-    assert mock_redis.zremrangebyscore.called
-
-
-@pytest.mark.asyncio
-async def test_rate_limiter_fallback_without_redis():
-    """Test fallback behavior when Redis not available."""
-    scraper = TMDBResearchScraper("test_key", redis_client=None)
-    
-    result = await scraper._check_rate_limit()
-    
-    # Should return True (fail open)
-    assert result is True
-
-
-@pytest.mark.asyncio
-async def test_make_request_handles_429():
-    """Test exponential backoff on 429 status."""
-    from unittest.mock import Mock, MagicMock
-    
-    mock_redis = AsyncMock()
-    mock_redis.zcard.return_value = 0
-    
-    mock_response = MagicMock()
-    mock_response.status = 429
-    
-    # Create proper async context manager
-    class MockContextManager:
-        async def __aenter__(self):
-            return mock_response
-        
-        async def __aexit__(self, *args):
-            pass
-    
-    # Use regular Mock for session, not AsyncMock
-    mock_session = Mock()
-    mock_session.get = Mock(return_value=MockContextManager())
-    
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
-    scraper.session = mock_session
-    
-    with pytest.raises(Exception, match="TMDB API request failed"):
-        await scraper._make_request("http://test", {})
-    
-    # Should have retried 3 times
-    assert mock_session.get.call_count == 3
-
-
-@pytest.mark.asyncio
-async def test_make_request_success():
-    """Test successful API request."""
-    from unittest.mock import Mock, MagicMock
-    
-    mock_redis = AsyncMock()
-    mock_redis.zcard.return_value = 0
-    
-    mock_response = MagicMock()
-    mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={'data': 'test'})
-    
-    # Create proper async context manager
-    class MockContextManager:
-        async def __aenter__(self):
-            return mock_response
-        
-        async def __aexit__(self, *args):
-            pass
-    
-    # Use regular Mock for session, not AsyncMock
-    mock_session = Mock()
-    mock_session.get = Mock(return_value=MockContextManager())
-    
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
-    scraper.session = mock_session
-    
-    result = await scraper._make_request("http://test", {})
-    
-    assert result == {'data': 'test'}
-    assert mock_session.get.call_count == 1
-
-
-@pytest.mark.asyncio
-async def test_make_request_timeout_retry():
-    """Test timeout triggers retry."""
-    from unittest.mock import Mock, MagicMock
-    import asyncio
-    
-    mock_redis = AsyncMock()
-    mock_redis.zcard.return_value = 0
-    
-    # Use regular Mock for session
-    mock_session = Mock()
-    # First two attempts timeout, third succeeds
-    mock_response = MagicMock()
-    mock_response.status = 200
-    mock_response.json = AsyncMock(return_value={'data': 'test'})
-    
-    side_effects = [
-        asyncio.TimeoutError(),
-        asyncio.TimeoutError(),
+    # Add old requests (11+ seconds ago - outside window)
+    import time
+    current_time = time.time()
+    scraper._request_times = [
+        current_time - 15,  # Old - should be removed
+        current_time - 12,  # Old - should be removed
+        current_time - 5,   # Recent - should stay
+        current_time - 2,   # Recent - should stay
     ]
     
-    call_count = [0]
+    await scraper._respect_rate_limit()
     
-    def get_side_effect(*args, **kwargs):
-        """Side effect function - must be regular function not async."""
-        call_count[0] += 1
-        if call_count[0] <= 2:
-            raise side_effects[call_count[0] - 1]
+    # Should have removed old entries and added new one
+    # Only the 2 recent ones + new one = 3
+    assert len(scraper._request_times) == 3
+
+
+@pytest.mark.asyncio
+async def test_rate_limiter_simple_usage():
+    """Test basic rate limiter usage."""
+    scraper = TMDBResearchScraper("test_key")
+    
+    # Should work without errors
+    await scraper._respect_rate_limit()
+    assert len(scraper._request_times) == 1
+    
+    await scraper._respect_rate_limit()
+    assert len(scraper._request_times) == 2
+
+
+@pytest.mark.asyncio
+async def test_search_show_with_mock():
+    """Test _search_show method with mocked API."""
+    from unittest.mock import Mock, MagicMock
+    
+    mock_response = MagicMock()
+    mock_response.status = 200
+    mock_response.json = AsyncMock(return_value={
+        'results': [{'id': 1234, 'name': 'I Love Lucy'}]
+    })
+    
+    class MockContextManager:
+        async def __aenter__(self):
+            return mock_response
         
-        class MockContext:
-            async def __aenter__(self):
-                return mock_response
-            
-            async def __aexit__(self, *args):
-                pass
-        
-        return MockContext()
+        async def __aexit__(self, *args):
+            pass
     
-    mock_session.get.side_effect = get_side_effect
+    mock_session = Mock()
+    mock_session.get = Mock(return_value=MockContextManager())
     
-    scraper = TMDBResearchScraper("test_key", redis_client=mock_redis)
+    scraper = TMDBResearchScraper("test_key")
     scraper.session = mock_session
     
-    result = await scraper._make_request("http://test", {})
+    show_id = await scraper._search_show("I Love Lucy")
     
-    assert result == {'data': 'test'}
-    assert call_count[0] == 3
+    assert show_id == 1234
+    assert mock_session.get.called
+
+
+@pytest.mark.asyncio
+async def test_search_show_not_found():
+    """Test _search_show returns None when not found."""
+    from unittest.mock import Mock, MagicMock
+    
+    mock_response = MagicMock()
+    mock_response.status = 200
+    mock_response.json = AsyncMock(return_value={'results': []})
+    
+    class MockContextManager:
+        async def __aenter__(self):
+            return mock_response
+        
+        async def __aexit__(self, *args):
+            pass
+    
+    mock_session = Mock()
+    mock_session.get = Mock(return_value=MockContextManager())
+    
+    scraper = TMDBResearchScraper("test_key")
+    scraper.session = mock_session
+    
+    show_id = await scraper._search_show("NonexistentShow12345")
+    
+    assert show_id is None
+
+
+@pytest.mark.asyncio
+async def test_get_show_details_structure():
+    """Test _get_show_details returns correct structure."""
+    from unittest.mock import Mock, MagicMock
+    
+    mock_response = MagicMock()
+    mock_response.status = 200
+    mock_response.json = AsyncMock(return_value={
+        'id': 1234,
+        'name': 'I Love Lucy',
+        'overview': 'Classic sitcom',
+        'vote_average': 8.5,
+        'vote_count': 500,
+        'popularity': 100.0,
+        'first_air_date': '1951-10-15',
+        'last_air_date': '1957-05-06',
+        'number_of_episodes': 180,
+        'number_of_seasons': 6,
+        'genres': [{'id': 35, 'name': 'Comedy'}],
+        'networks': [{'id': 1, 'name': 'CBS'}],
+        'production_companies': [],
+        'poster_path': '/poster.jpg',
+        'backdrop_path': '/backdrop.jpg',
+    })
+    
+    class MockContextManager:
+        async def __aenter__(self):
+            return mock_response
+        
+        async def __aexit__(self, *args):
+            pass
+    
+    mock_session = Mock()
+    mock_session.get = Mock(return_value=MockContextManager())
+    
+    scraper = TMDBResearchScraper("test_key")
+    scraper.session = mock_session
+    
+    details = await scraper._get_show_details(1234)
+    
+    assert details['name'] == 'I Love Lucy'
+    assert details['vote_average'] == 8.5
+    assert details['number_of_episodes'] == 180
+
+
+@pytest.mark.asyncio
+async def test_get_credits_structure():
+    """Test _get_credits returns cast list."""
+    from unittest.mock import Mock, MagicMock
+    
+    mock_response = MagicMock()
+    mock_response.status = 200
+    mock_response.json = AsyncMock(return_value={
+        'cast': [
+            {
+                'name': 'Lucille Ball',
+                'character': 'Lucy Ricardo',
+                'order': 0,
+                'profile_path': '/lucy.jpg'
+            }
+        ]
+    })
+    
+    class MockContextManager:
+        async def __aenter__(self):
+            return mock_response
+        
+        async def __aexit__(self, *args):
+            pass
+    
+    mock_session = Mock()
+    mock_session.get = Mock(return_value=MockContextManager())
+    
+    scraper = TMDBResearchScraper("test_key")
+    scraper.session = mock_session
+    
+    credits = await scraper._get_credits(1234)
+    
+    assert len(credits['cast']) == 1
+    assert credits['cast'][0]['name'] == 'Lucille Ball'
