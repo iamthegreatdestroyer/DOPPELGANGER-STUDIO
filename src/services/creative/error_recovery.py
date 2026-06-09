@@ -127,6 +127,7 @@ class ErrorRecoverySystem:
         cache_key: Optional[str] = None,
         component: str = "unknown",
         operation_name: str = "unknown",
+        max_retries: Optional[int] = None,
         **kwargs
     ) -> RecoveryResult:
         """

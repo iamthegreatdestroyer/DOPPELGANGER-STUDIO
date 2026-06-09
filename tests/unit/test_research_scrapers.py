@@ -111,11 +111,11 @@ class TestWikipediaResearchScraper:
         scraper = WikipediaResearchScraper()
         
         section = Mock()
-        section.text = """Lucy Ricardo is the main character played by Lucille Ball.
-        
-        Ricky Ricardo is Lucy's husband, a Cuban bandleader.
-        
-        Ethel Mertz is Lucy's best friend and landlady."""
+        section.text = """Lucy Ricardo, the main character played by Lucille Ball.
+
+Ricky Ricardo, Lucy's husband - a Cuban bandleader.
+
+Ethel Mertz, Lucy's best friend and landlady."""
         
         characters = scraper._parse_character_section(section)
         
@@ -302,51 +302,51 @@ class TestTMDBResearchScraper:
     ):
         """Test successful show search."""
         async with TMDBResearchScraper(api_key="test") as scraper:
-            # Mock HTTP response
+            # aiohttp: session.get() is a sync call returning an async ctx mgr
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value=mock_tmdb_search_response)
-            
-            scraper.session.get = AsyncMock(return_value=mock_response)
             mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-            mock_response.__aexit__ = AsyncMock()
-            
+            mock_response.__aexit__ = AsyncMock(return_value=False)
+
+            scraper.session.get = MagicMock(return_value=mock_response)
+
             show_id = await scraper._search_show("I Love Lucy")
             assert show_id == 1668
-    
+
     @pytest.mark.asyncio
     async def test_search_show_not_found(self):
         """Test show not found."""
         async with TMDBResearchScraper(api_key="test") as scraper:
-            # Mock empty response
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={'results': []})
-            
-            scraper.session.get = AsyncMock(return_value=mock_response)
             mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-            mock_response.__aexit__ = AsyncMock()
-            
+            mock_response.__aexit__ = AsyncMock(return_value=False)
+
+            scraper.session.get = MagicMock(return_value=mock_response)
+
             show_id = await scraper._search_show("NonexistentShow")
             assert show_id is None
-    
+
     @pytest.mark.asyncio
     async def test_search_show_rate_limited(self):
         """Test handling of 429 rate limit."""
         async with TMDBResearchScraper(api_key="test") as scraper:
-            # First response: 429, second: success
+            # First response: 429
             mock_response_429 = AsyncMock()
             mock_response_429.status = 429
             mock_response_429.__aenter__ = AsyncMock(return_value=mock_response_429)
-            mock_response_429.__aexit__ = AsyncMock()
-            
+            mock_response_429.__aexit__ = AsyncMock(return_value=False)
+
+            # Second response: 200
             mock_response_200 = AsyncMock()
             mock_response_200.status = 200
             mock_response_200.json = AsyncMock(return_value={'results': [{'id': 123}]})
             mock_response_200.__aenter__ = AsyncMock(return_value=mock_response_200)
-            mock_response_200.__aexit__ = AsyncMock()
-            
-            scraper.session.get = AsyncMock(
+            mock_response_200.__aexit__ = AsyncMock(return_value=False)
+
+            scraper.session.get = MagicMock(
                 side_effect=[mock_response_429, mock_response_200]
             )
             
@@ -397,24 +397,24 @@ class TestTMDBResearchScraper:
     ):
         """Test full research flow."""
         async with TMDBResearchScraper(api_key="test") as scraper:
-            # Mock all HTTP calls
-            async def mock_get(*args, **kwargs):
+            # Mock all HTTP calls — sync function returning async ctx mgr
+            def mock_get(*args, **kwargs):
                 mock_response = AsyncMock()
                 mock_response.status = 200
-                
+
                 url = str(args[0]) if args else kwargs.get('url', '')
-                
+
                 if 'search' in url:
                     mock_response.json = AsyncMock(return_value=mock_tmdb_search_response)
                 elif 'credits' in url:
                     mock_response.json = AsyncMock(return_value=mock_tmdb_credits_response)
                 else:
                     mock_response.json = AsyncMock(return_value=mock_tmdb_details_response)
-                
+
                 mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-                mock_response.__aexit__ = AsyncMock()
+                mock_response.__aexit__ = AsyncMock(return_value=False)
                 return mock_response
-            
+
             scraper.session.get = mock_get
             
             data = await scraper.research_show("I Love Lucy")

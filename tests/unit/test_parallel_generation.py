@@ -84,7 +84,7 @@ def script_generator_parallel():
         mock_comedy.overall_effectiveness = 0.85
         mock_comedy.to_dict = Mock(return_value={})
         
-        generator.joke_optimizer.optimize_script_comedy = Mock(
+        generator.joke_optimizer.optimize_script_comedy = AsyncMock(
             return_value=mock_comedy
         )
         
@@ -381,7 +381,7 @@ class TestPerformanceComparison:
             )
             
             # Mock other components
-            generator.joke_optimizer.optimize_script_comedy = Mock(
+            generator.joke_optimizer.optimize_script_comedy = AsyncMock(
                 return_value=Mock(
                     analyzed_jokes=[],
                     timing_analysis=Mock(

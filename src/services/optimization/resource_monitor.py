@@ -63,14 +63,17 @@ class ResourceMonitor:
         memory_info = self._process.memory_info()
         virtual_memory = psutil.virtual_memory()
         
-        disk_io = self._process.io_counters()
-        if self._last_disk_io:
-            disk_read_mb = (disk_io.read_bytes - self._last_disk_io.read_bytes) / 1024 / 1024
-            disk_write_mb = (disk_io.write_bytes - self._last_disk_io.write_bytes) / 1024 / 1024
-        else:
+        try:
+            disk_io = self._process.io_counters()
+            if self._last_disk_io:
+                disk_read_mb = (disk_io.read_bytes - self._last_disk_io.read_bytes) / 1024 / 1024
+                disk_write_mb = (disk_io.write_bytes - self._last_disk_io.write_bytes) / 1024 / 1024
+            else:
+                disk_read_mb = disk_write_mb = 0.0
+            self._last_disk_io = disk_io
+        except Exception:
             disk_read_mb = disk_write_mb = 0.0
-        self._last_disk_io = disk_io
-        
+
         network_io = psutil.net_io_counters()
         if self._last_network_io:
             net_sent_mb = (network_io.bytes_sent - self._last_network_io.bytes_sent) / 1024 / 1024
@@ -78,7 +81,12 @@ class ResourceMonitor:
         else:
             net_sent_mb = net_recv_mb = 0.0
         self._last_network_io = network_io
-        
+
+        try:
+            open_files = len(self._process.open_files())
+        except Exception:
+            open_files = 0
+
         return ResourceSnapshot(
             timestamp=datetime.now(),
             cpu_percent=cpu_percent,
@@ -88,7 +96,7 @@ class ResourceMonitor:
             disk_io_write_mb=disk_write_mb,
             network_sent_mb=net_sent_mb,
             network_recv_mb=net_recv_mb,
-            open_files=len(self._process.open_files()),
+            open_files=open_files,
             threads=self._process.num_threads()
         )
     

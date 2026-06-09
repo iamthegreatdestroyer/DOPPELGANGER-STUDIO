@@ -30,6 +30,10 @@ env/
 # IDEs
 .vscode/
 .idea/
+.history/
+
+# Testing artifacts
+.hypothesis/
 *.swp
 *.swo
 *~

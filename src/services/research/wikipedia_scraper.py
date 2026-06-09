@@ -171,7 +171,13 @@ class WikipediaResearchScraper:
         # Pattern: (YYYY-YYYY) or YYYY-YYYY
         pattern = r'\(?(\d{4})[–\-](\d{4})\)?'
         match = re.search(pattern, text)
-        
+
+        if match:
+            return f"{match.group(1)}-{match.group(2)}"
+
+        # Pattern: "from YYYY to YYYY"
+        pattern = r'from\s+(\d{4})\s+to\s+(\d{4})'
+        match = re.search(pattern, text)
         if match:
             return f"{match.group(1)}-{match.group(2)}"
         

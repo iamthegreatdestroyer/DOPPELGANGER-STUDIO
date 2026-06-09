@@ -18,10 +18,12 @@ from src.services.animation.manim_wrapper import (
 @pytest.fixture
 def manim_wrapper():
     """Create ManimWrapper instance for testing."""
-    with patch('src.services.animation.manim_wrapper.MANIM_AVAILABLE', True):
-        with patch('src.services.animation.manim_wrapper.config'):
-            wrapper = ManimWrapper(quality=RenderQuality.PREVIEW)
-            return wrapper
+    mock_scene_cls = type('Scene', (), {})
+    with patch('src.services.animation.manim_wrapper.MANIM_AVAILABLE', True), \
+         patch('src.services.animation.manim_wrapper.config', create=True), \
+         patch('src.services.animation.manim_wrapper.Scene', mock_scene_cls, create=True):
+        wrapper = ManimWrapper(quality=RenderQuality.PREVIEW)
+        yield wrapper
 
 
 def test_manim_wrapper_init(manim_wrapper):

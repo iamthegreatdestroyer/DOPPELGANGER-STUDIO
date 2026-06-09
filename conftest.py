@@ -53,4 +53,11 @@ def pytest_ignore_collect(collection_path, config):
         if any(filename.startswith(pref) for pref in patterns):
             return True
 
+    # Skip CLIP tests if the clip module (requires torch) is not installed
+    filename = os.path.basename(p)
+    if filename == "test_clip_tagger.py":
+        import importlib.util as _ilu
+        if _ilu.find_spec("clip") is None:
+            return True
+
     return False

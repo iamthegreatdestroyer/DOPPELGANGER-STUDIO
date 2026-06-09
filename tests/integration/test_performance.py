@@ -268,7 +268,7 @@ def mock_generator_with_timing():
                 optimization_summary="Good comedy timing"
             )
         
-        generator.joke_optimizer.optimize_script_comedy = Mock(
+        generator.joke_optimizer.optimize_script_comedy = AsyncMock(
             side_effect=mock_optimize_comedy
         )
         
@@ -519,7 +519,7 @@ class TestParallelSpeedup:
                 gen.stage_direction_generator.generate_stage_directions = AsyncMock(side_effect=mock_stage)
                 
                 from src.services.creative.joke_models import OptimizedScriptComedy, ComedyTimingAnalysis, JokeTiming
-                gen.joke_optimizer.optimize_script_comedy = Mock(return_value=OptimizedScriptComedy(
+                gen.joke_optimizer.optimize_script_comedy = AsyncMock(return_value=OptimizedScriptComedy(
                     script_id="test",
                     timing_analysis=ComedyTimingAnalysis(
                         total_jokes=5,
@@ -718,7 +718,7 @@ class TestBottleneckDetection:
             generator.stage_direction_generator.generate_stage_directions = AsyncMock(side_effect=fast_stage)
             
             from src.services.creative.joke_models import OptimizedScriptComedy, ComedyTimingAnalysis, JokeTiming
-            generator.joke_optimizer.optimize_script_comedy = Mock(return_value=OptimizedScriptComedy(
+            generator.joke_optimizer.optimize_script_comedy = AsyncMock(return_value=OptimizedScriptComedy(
                 script_id="test",
                 timing_analysis=ComedyTimingAnalysis(
                     total_jokes=5,

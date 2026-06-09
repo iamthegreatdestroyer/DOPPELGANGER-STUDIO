@@ -7,6 +7,7 @@ Copyright (c) 2025. All Rights Reserved. Patent Pending.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timedelta
@@ -17,27 +18,34 @@ from src.services.research.postgres_cache import PostgresResearchCache
 
 class TestPostgresResearchCache:
     """Test suite for PostgreSQL research cache."""
-    
-    @pytest.fixture
+
+    @pytest_asyncio.fixture
     async def mock_pool(self):
-        """Create mock connection pool."""
-        pool = AsyncMock()
-        
-        # Mock connection
+        """Create mock connection pool.
+
+        asyncpg's pool.acquire() is a *sync* call that returns an async ctx mgr,
+        so we use MagicMock (not AsyncMock) for acquire itself.
+        """
+        from unittest.mock import MagicMock
+
+        pool = Mock()
+
+        # Connection returned by the context manager
         conn = AsyncMock()
         conn.execute = AsyncMock()
         conn.fetchrow = AsyncMock()
         conn.fetchval = AsyncMock()
         conn.fetch = AsyncMock()
-        
-        # Mock acquire context manager
-        acquire = AsyncMock()
-        acquire.__aenter__ = AsyncMock(return_value=conn)
-        acquire.__aexit__ = AsyncMock()
-        pool.acquire.return_value = acquire
-        
+
+        # Async context manager returned by pool.acquire()
+        acquire_ctx = AsyncMock()
+        acquire_ctx.__aenter__ = AsyncMock(return_value=conn)
+        acquire_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        # pool.acquire is a sync method returning the ctx mgr
+        pool.acquire = MagicMock(return_value=acquire_ctx)
         pool.close = AsyncMock()
-        
+
         return pool
     
     @pytest.mark.asyncio
@@ -45,7 +53,7 @@ class TestPostgresResearchCache:
         """Test cache initializes correctly."""
         cache = PostgresResearchCache("postgresql://test")
         
-        with patch('asyncpg.create_pool', return_value=mock_pool):
+        with patch('asyncpg.create_pool', new_callable=AsyncMock, return_value=mock_pool):
             await cache.initialize()
             
             assert cache.pool == mock_pool

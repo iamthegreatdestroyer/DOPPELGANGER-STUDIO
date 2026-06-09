@@ -1,5 +1,10 @@
 version: '3.8'
 
+# =============================================================================
+# DOPPELGANGER STUDIO Docker Compose Configuration
+# Port Series: 10000-10999 (DOPPELGANGER exclusive range)
+# =============================================================================
+
 services:
   # Main application
   app:
@@ -8,7 +13,7 @@ services:
       dockerfile: Dockerfile
     container_name: doppelganger-app
     ports:
-      - "8000:8000"
+      - "10080:8000"  # API (internal 8000 → external 10080)
     environment:
       - ENVIRONMENT=development
       - POSTGRES_HOST=postgres
@@ -44,7 +49,7 @@ services:
       - POSTGRES_USER=doppelganger_user
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "10432:5432"  # PostgreSQL (internal 5432 → external 10432)
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -62,7 +67,7 @@ services:
     image: redis:7-alpine
     container_name: doppelganger-redis
     ports:
-      - "6379:6379"
+      - "10500:6379"  # Redis (internal 6379 → external 10500)
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
@@ -83,7 +88,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
-      - "27017:27017"
+      - "10517:27017"  # MongoDB (internal 27017 → external 10517)
     volumes:
       - mongo-data:/data/db
     networks:
@@ -97,7 +102,7 @@ services:
       dockerfile: Dockerfile.dashboard
     container_name: doppelganger-dashboard
     ports:
-      - "3000:3000"
+      - "10000:3000"  # Dashboard (internal 3000 → external 10000)
     environment:
       - APP_HOST=app
       - APP_PORT=8000

@@ -45,7 +45,7 @@ def script_generator():
         generator.stage_direction_generator.generate_stage_directions = AsyncMock(
             return_value=create_mock_stage_directions()
         )
-        generator.joke_optimizer.optimize_script_comedy = Mock(
+        generator.joke_optimizer.optimize_script_comedy = AsyncMock(
             return_value=create_mock_comedy_analysis()
         )
         generator.script_validator.validate_script = Mock(

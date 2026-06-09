@@ -364,7 +364,7 @@ class ResearchOrchestrator:
         # Prefer TMDB cast (more structured)
         if tmdb_data and tmdb_data.cast:
             return tmdb_data.cast
-        if wiki_data and wiki_data.cast:
+        if wiki_data and getattr(wiki_data, 'cast', None):
             return wiki_data.cast
         return []
     

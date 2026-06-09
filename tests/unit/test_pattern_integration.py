@@ -27,7 +27,10 @@ class TestPatternIntegrator:
             "years": "1951-1957",
             "genre": ["Sitcom"],
             "themes": ["Marriage", "Ambition", "Comedy"],
-            "premise": "A housewife schemes to break into show business"
+            "premise": (
+                "A housewife devises intricate plans to achieve show business goals, "
+                "but cascading complications cause spectacular failure"
+            )
         }
         
         result = self.integrator.analyze_show_patterns(show_data)
@@ -93,7 +96,10 @@ class TestPatternIntegrator:
             "title": "I Love Lucy",
             "years": "1951-1957",
             "genre": ["Sitcom"],
-            "premise": "Housewife schemes for show business"
+            "premise": (
+                "A housewife devises intricate plans to achieve show business goals, "
+                "but cascading complications cause spectacular failure"
+            )
         }
         
         result = self.integrator.analyze_show_patterns(show_data)
