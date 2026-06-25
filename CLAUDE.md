@@ -52,12 +52,12 @@ git tag v0.1.0 && git push origin v0.1.0
 ```
 
 ## Done Criteria
-- [ ] `pip install` succeeds
-- [ ] `pytest tests/` passes
-- [ ] ShowAnalyzer extracts humor patterns and vibe from sample text
-- [ ] ContentGenerator produces a reimagined script excerpt
-- [ ] CLI works end-to-end
-- [ ] `v0.1.0` tag pushed
+- [x] `pip install` succeeds
+- [x] `pytest tests/` passes
+- [x] ShowAnalyzer extracts humor patterns and vibe from sample text
+- [x] ContentGenerator produces a reimagined script excerpt
+- [x] CLI works end-to-end
+- [x] `v0.1.0` tag pushed
 
 ## Completion Signal
 ```bash
