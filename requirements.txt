@@ -28,7 +28,7 @@ mccabe==0.7.0
 multidict==6.6.4
 mypy==1.18.2
 mypy_extensions==1.1.0
-openai==2.1.0
+# openai removed 2026-07-02 (No-OpenAI policy) — fallback is the local Ryzanstein gateway
 packaging==25.0
 pathspec==0.12.1
 pinecone-client==6.0.0

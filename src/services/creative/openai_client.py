@@ -1,56 +1,87 @@
 """
-OpenAI Client - GPT-4 fallback for creative intelligence.
+Local Fallback Client — local-first replacement for the former GPT-4 fallback.
 
-Provides GPT-4 integration as fallback when Claude is unavailable.
+POLICY REPLACEMENT (2026-07-02): this module previously wrapped the OpenAI API
+(AsyncOpenAI / gpt-4-turbo-preview) as the fallback when Claude was
+unavailable. Per the ecosystem's No-OpenAI policy (values-driven: maximum
+privacy, security, and non-codependency on external companies), the fallback
+is now the LOCAL Ryzanstein gateway (:8000), which fronts Ollama and adds
+Token-Recycler semantic caching. No prompt or script data leaves the machine
+on the fallback path anymore.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+The class keeps the name `OpenAIClient` as a deprecated import-compat alias —
+six sibling modules import it by that name; the canonical name going forward
+is `LocalFallbackClient`.
+
+Default model: qwythos-9b (the custom Claude-Mythos creative-writing merge
+served by the local Ollama), override via DOPPELGANGER_LOCAL_MODEL.
+Gateway URL: RYZANSTEIN_URL (default http://localhost:8000).
+
+Copyright (c) 2025-2026. All Rights Reserved. Patent Pending.
 """
 
 from typing import Dict, List, Optional, Any
 import asyncio
-import logging
-from openai import AsyncOpenAI
 import hashlib
 import json
+import logging
+import os
+import re
 
-from .claude_client import AIResponse
+import httpx
+
+try:
+    from .claude_client import AIResponse
+except ImportError:
+    # anthropic SDK not installed — define the identical response container
+    # locally so the fallback client works standalone (that is its whole job).
+    from dataclasses import dataclass as _dataclass
+
+    @_dataclass
+    class AIResponse:  # type: ignore[no-redef]
+        """Container for AI response data (local mirror of claude_client's)."""
+        content: str
+        model: str
+        tokens_used: int
+        finish_reason: str
+        cached: bool = False
+        raw_response: Optional[Dict] = None
 
 logger = logging.getLogger(__name__)
 
 
-class OpenAIClient:
+class LocalFallbackClient:
     """
-    Client for GPT-4 API with caching and retry logic.
-    
-    Serves as fallback when Claude is unavailable or rate-limited.
+    Fallback AI client backed by the local Ryzanstein gateway (Ollama).
+
+    Interface-compatible with the former GPT-4 client: generate(),
+    generate_json(), get_usage_stats(), same constructor shape. The
+    `api_key` argument is accepted and ignored (no key is needed for
+    local inference) so existing call sites keep working unchanged.
     """
-    
-    MODEL = "gpt-4-turbo-preview"
+
+    MODEL = os.getenv("DOPPELGANGER_LOCAL_MODEL", "qwythos-9b")
+    BASE_URL = os.getenv("RYZANSTEIN_URL", "http://localhost:8000")
     MAX_TOKENS = 4096
     DEFAULT_TEMPERATURE = 0.7
-    
+
     def __init__(
         self,
-        api_key: str,
+        api_key: Optional[str] = None,
         cache_client: Optional[Any] = None,
-        cache_ttl: int = 604800
+        cache_ttl: int = 604800,
     ):
-        """
-        Initialize OpenAI client.
-        
-        Args:
-            api_key: OpenAI API key
-            cache_client: Optional Redis client
-            cache_ttl: Cache TTL in seconds
-        """
-        self.client = AsyncOpenAI(api_key=api_key)
+        if api_key:
+            logger.info(
+                "LocalFallbackClient: api_key argument is ignored — fallback "
+                "inference is local (Ryzanstein gateway), no external API key needed."
+            )
         self.cache_client = cache_client
         self.cache_ttl = cache_ttl
-        
         self.total_tokens_used = 0
         self.total_requests = 0
         self.cache_hits = 0
-    
+
     async def generate(
         self,
         prompt: str,
@@ -58,12 +89,13 @@ class OpenAIClient:
         max_tokens: int = MAX_TOKENS,
         temperature: float = DEFAULT_TEMPERATURE,
         json_mode: bool = False,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> AIResponse:
-        """Generate text using GPT-4."""
-        logger.debug(f"Generating with GPT-4 (prompt length: {len(prompt)})")
-        
-        # Check cache
+        """Generate text using the local Ryzanstein gateway (Ollama-backed)."""
+        logger.debug(
+            f"Generating with local fallback ({self.MODEL}, prompt length: {len(prompt)})"
+        )
+
         if use_cache:
             cached = await self._get_from_cache(
                 prompt, system_prompt, max_tokens, temperature
@@ -71,128 +103,142 @@ class OpenAIClient:
             if cached:
                 self.cache_hits += 1
                 return cached
-        
-        # Build messages
-        messages = []
+
+        user_prompt = prompt
+        if json_mode:
+            user_prompt += "\n\nRespond with valid JSON only — no prose, no code fences."
+
+        messages: List[Dict[str, str]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
-        
-        # Make request
+        messages.append({"role": "user", "content": user_prompt})
+
+        payload = {
+            "model": self.MODEL,
+            "messages": messages,
+            "stream": False,
+            "options": {
+                "temperature": temperature,
+                "num_predict": max_tokens,
+            },
+        }
+
         try:
-            kwargs = {
-                'model': self.MODEL,
-                'messages': messages,
-                'max_tokens': max_tokens,
-                'temperature': temperature
-            }
-            
-            if json_mode:
-                kwargs['response_format'] = {"type": "json_object"}
-                prompt += "\n\nRespond with valid JSON."
-            
-            response = await self.client.chat.completions.create(**kwargs)
-            
-            content = response.choices[0].message.content
-            tokens_used = response.usage.total_tokens
-            
+            async with httpx.AsyncClient(timeout=300.0) as client:
+                resp = await client.post(f"{self.BASE_URL}/api/chat", json=payload)
+                resp.raise_for_status()
+                data = resp.json()
+
+            content = (data.get("message") or {}).get("content", "") or ""
+            tokens_used = int(
+                (data.get("prompt_eval_count") or 0) + (data.get("eval_count") or 0)
+            )
             self.total_tokens_used += tokens_used
             self.total_requests += 1
-            
+
             ai_response = AIResponse(
                 content=content,
-                model=response.model,
+                model=data.get("model", self.MODEL),
                 tokens_used=tokens_used,
-                finish_reason=response.choices[0].finish_reason,
-                cached=False
+                finish_reason=data.get("done_reason", "stop") or "stop",
+                cached=False,
             )
-            
+
             if use_cache:
                 await self._save_to_cache(
                     prompt, system_prompt, max_tokens, temperature, ai_response
                 )
-            
             return ai_response
-            
+
         except Exception as e:
-            logger.error(f"GPT-4 generation failed: {e}")
+            logger.error(f"Local fallback generation failed: {e}")
             raise
-    
+
     async def generate_json(
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
         max_tokens: int = MAX_TOKENS,
-        temperature: float = DEFAULT_TEMPERATURE
+        temperature: float = DEFAULT_TEMPERATURE,
     ) -> Dict:
-        """Generate JSON response using GPT-4."""
+        """Generate and parse a JSON response."""
         response = await self.generate(
             prompt=prompt,
             system_prompt=system_prompt,
             max_tokens=max_tokens,
             temperature=temperature,
-            json_mode=True
+            json_mode=True,
         )
-        
+        text = response.content.strip()
         try:
-            return json.loads(response.content)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse JSON: {e}")
-            raise ValueError(f"Invalid JSON from GPT-4: {e}")
-    
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # Local models sometimes wrap JSON in code fences or prose —
+            # extract the outermost object before giving up.
+            match = re.search(r"\{.*\}", text, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+            raise
+
     def _cache_key(self, prompt, system_prompt, max_tokens, temperature) -> str:
-        """Generate cache key."""
-        key_data = f"{prompt}:{system_prompt}:{max_tokens}:{temperature}"
-        return f"gpt4:{hashlib.sha256(key_data.encode()).hexdigest()}"
-    
+        raw = f"local:{self.MODEL}:{prompt}:{system_prompt}:{max_tokens}:{temperature}"
+        return "dopp:ai:" + hashlib.sha256(raw.encode()).hexdigest()
+
     async def _get_from_cache(
         self, prompt, system_prompt, max_tokens, temperature
     ) -> Optional[AIResponse]:
-        """Get from cache."""
         if not self.cache_client:
             return None
-        
         try:
             key = self._cache_key(prompt, system_prompt, max_tokens, temperature)
-            cached = await self.cache_client.get(key)
-            if cached:
-                data = json.loads(cached)
-                return AIResponse(**data, cached=True)
+            raw = self.cache_client.get(key)
+            if asyncio.iscoroutine(raw):
+                raw = await raw
+            if not raw:
+                return None
+            data = json.loads(raw)
+            return AIResponse(
+                content=data["content"],
+                model=data["model"],
+                tokens_used=data["tokens_used"],
+                finish_reason=data["finish_reason"],
+                cached=True,
+            )
         except Exception as e:
-            logger.warning(f"Cache get failed: {e}")
-        
-        return None
-    
+            logger.debug(f"Cache read failed (ignored): {e}")
+            return None
+
     async def _save_to_cache(
-        self, prompt, system_prompt, max_tokens, temperature, response
-    ):
-        """Save to cache."""
+        self, prompt, system_prompt, max_tokens, temperature, response: AIResponse
+    ) -> None:
         if not self.cache_client:
             return
-        
         try:
             key = self._cache_key(prompt, system_prompt, max_tokens, temperature)
-            cache_data = {
-                'content': response.content,
-                'model': response.model,
-                'tokens_used': response.tokens_used,
-                'finish_reason': response.finish_reason
-            }
-            await self.cache_client.setex(
-                key, self.cache_ttl, json.dumps(cache_data)
+            raw = json.dumps(
+                {
+                    "content": response.content,
+                    "model": response.model,
+                    "tokens_used": response.tokens_used,
+                    "finish_reason": response.finish_reason,
+                }
             )
+            result = self.cache_client.setex(key, self.cache_ttl, raw)
+            if asyncio.iscoroutine(result):
+                await result
         except Exception as e:
-            logger.warning(f"Cache save failed: {e}")
-    
+            logger.debug(f"Cache write failed (ignored): {e}")
+
     def get_usage_stats(self) -> Dict:
-        """Get usage statistics."""
         return {
-            'total_requests': self.total_requests,
-            'total_tokens': self.total_tokens_used,
-            'cache_hits': self.cache_hits,
-            'cache_hit_rate': (
-                self.cache_hits / self.total_requests
-                if self.total_requests > 0
-                else 0.0
-            )
+            "provider": "local-ryzanstein",
+            "model": self.MODEL,
+            "total_requests": self.total_requests,
+            "total_tokens_used": self.total_tokens_used,
+            "cache_hits": self.cache_hits,
         }
+
+
+# Deprecated import-compat alias — six sibling modules import this name.
+# New code should import LocalFallbackClient.
+OpenAIClient = LocalFallbackClient

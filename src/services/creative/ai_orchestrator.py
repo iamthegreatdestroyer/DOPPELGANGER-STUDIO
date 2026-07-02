@@ -88,7 +88,7 @@ class AIOrchestrator:
             except Exception as e:
                 logger.warning(f"Claude failed: {e}. Trying fallback...")
         
-        # Fallback to GPT-4
+        # Fallback to the local Ryzanstein gateway (No-OpenAI policy, 2026-07-02)
         if self.openai_client:
             try:
                 return await self.openai_client.generate(
@@ -99,7 +99,7 @@ class AIOrchestrator:
                     json_mode=json_mode
                 )
             except Exception as e:
-                logger.error(f"GPT-4 also failed: {e}")
+                logger.error(f"Local fallback also failed: {e}")
                 raise
         
         raise RuntimeError("All AI providers failed")
@@ -121,7 +121,7 @@ class AIOrchestrator:
             except Exception as e:
                 logger.warning(f"Claude JSON failed: {e}")
         
-        # Fallback to GPT-4
+        # Fallback to the local Ryzanstein gateway (No-OpenAI policy, 2026-07-02)
         if self.openai_client:
             try:
                 return await self.openai_client.generate_json(
