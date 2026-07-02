@@ -28,7 +28,7 @@ import logging
 import os
 import re
 
-import httpx
+from sigma_core import RyzansteinClient
 
 try:
     from .claude_client import AIResponse
@@ -81,6 +81,8 @@ class LocalFallbackClient:
         self.total_tokens_used = 0
         self.total_requests = 0
         self.cache_hits = 0
+        # The one shared gateway client (sigma_core) — owns base_url/timeout config.
+        self._client = RyzansteinClient(base_url=self.BASE_URL, chat_model=self.MODEL)
 
     async def generate(
         self,
@@ -108,39 +110,29 @@ class LocalFallbackClient:
         if json_mode:
             user_prompt += "\n\nRespond with valid JSON only — no prose, no code fences."
 
-        messages: List[Dict[str, str]] = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": user_prompt})
-
-        payload = {
-            "model": self.MODEL,
-            "messages": messages,
-            "stream": False,
-            "options": {
-                "temperature": temperature,
-                "num_predict": max_tokens,
-            },
-        }
-
         try:
-            async with httpx.AsyncClient(timeout=300.0) as client:
-                resp = await client.post(f"{self.BASE_URL}/api/chat", json=payload)
-                resp.raise_for_status()
-                data = resp.json()
-
-            content = (data.get("message") or {}).get("content", "") or ""
-            tokens_used = int(
-                (data.get("prompt_eval_count") or 0) + (data.get("eval_count") or 0)
+            # Delegate the /api/chat call, payload shape, and content parse to the
+            # one shared Ryzanstein gateway client (sigma_core). base_url + model
+            # default remain overridable via RYZANSTEIN_URL / DOPPELGANGER_LOCAL_MODEL.
+            content = await self._client.achat(
+                user_prompt,
+                system=system_prompt,
+                model=self.MODEL,
+                temperature=temperature,
+                max_tokens=max_tokens,
             )
+
+            # achat returns content only; the gateway's raw token counts are not
+            # surfaced, so estimate tokens (~4 chars/token) to keep usage stats live.
+            tokens_used = (len(prompt) + len(system_prompt or "") + len(content)) // 4
             self.total_tokens_used += tokens_used
             self.total_requests += 1
 
             ai_response = AIResponse(
                 content=content,
-                model=data.get("model", self.MODEL),
+                model=self.MODEL,
                 tokens_used=tokens_used,
-                finish_reason=data.get("done_reason", "stop") or "stop",
+                finish_reason="stop",
                 cached=False,
             )
 
