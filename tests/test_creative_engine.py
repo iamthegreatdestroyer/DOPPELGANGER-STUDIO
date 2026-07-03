@@ -108,30 +108,32 @@ class TestClaudeClient:
 
 
 class TestOpenAIClient:
-    """Test suite for OpenAI GPT-4 client."""
-    
+    """Test suite for OpenAIClient, a deprecated import-compat alias for
+    LocalFallbackClient (the OpenAI SDK was replaced with the local
+    Ryzanstein gateway per the ecosystem's No-OpenAI policy, 2026-07-02).
+    This test mocked the old nested `client.chat.completions.create` shape,
+    which the current implementation no longer has -- generate() now calls
+    self._client.achat(...) (sigma_core.RyzansteinClient), which returns a
+    plain string, not an OpenAI-style response object."""
+
     @pytest.mark.asyncio
     async def test_generate_success(self):
-        """Test successful generation."""
+        """Test successful generation via the local Ryzanstein gateway."""
         client = OpenAIClient(api_key="test_key")
-        
-        mock_response = Mock()
-        mock_response.choices = [Mock(
-            message=Mock(content="Generated text"),
-            finish_reason="stop"
-        )]
-        mock_response.usage = Mock(total_tokens=150)
-        mock_response.model = "gpt-4-turbo-preview"
-        
+
         with patch.object(
-            client.client.chat.completions,
-            'create',
-            new=AsyncMock(return_value=mock_response)
+            client._client,
+            'achat',
+            new=AsyncMock(return_value="Generated text")
         ):
             response = await client.generate("Test prompt")
-            
+
             assert response.content == "Generated text"
-            assert response.tokens_used == 150
+            # tokens_used is now a length-based estimate (no real token
+            # count is available from achat's plain-string return), so the
+            # old mocked "== 150" is meaningless here -- assert it's a
+            # sensible positive number instead.
+            assert response.tokens_used > 0
 
 
 class TestAIOrchestrator:
