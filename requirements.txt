@@ -67,3 +67,4 @@ uvicorn==0.37.0
 Wikipedia-API==0.8.1
 yarl==1.20.0
 Pydub==0.25.1
+ImageHash==4.3.2
