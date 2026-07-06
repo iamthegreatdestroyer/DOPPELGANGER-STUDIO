@@ -83,8 +83,8 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
+include = ["*"]
 exclude = ["tests*", "docs*"]
 
 [tool.pytest.ini_options]
