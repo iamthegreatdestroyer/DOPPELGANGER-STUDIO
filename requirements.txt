@@ -1,5 +1,5 @@
 aiohappyeyeballs==2.6.1
-aiohttp==3.12.15
+aiohttp>=3.14.1
 aiosignal==1.4.0
 annotated-types==0.7.0
 anthropic==0.69.0
@@ -34,8 +34,8 @@ pathspec==0.12.1
 pinecone-client==6.0.0
 pinecone-plugin-interface==0.0.7
 platformdirs==4.4.0
-torch==2.8.0
-torchvision==0.23.0
+torch>=2.11.0
+torchvision>=0.26.0
 opencv-python-headless==4.12.0.88
 ftfy==6.3.1
 clip @ git+https://github.com/openai/CLIP.git
