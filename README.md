@@ -22,12 +22,20 @@ Same heart. Same laughs. Completely new adventures.
 - 🤖 **AI-Driven Concept Extraction** - Deep analysis of show DNA
 - 🎨 **Automated Character Transformation** - Context-aware redesigns
 - 📝 **Intelligent Script Generation** - Maintains original humor style
-- 🎬 **Programmatic Animation** - Multiple visual styles
+- 🎬 **Programmatic Animation** - Multiple visual styles _(⚠️ experimental — not yet implemented)_
 - 🗣️ **Neural Voice Synthesis** - Distinct character personalities
 - 🌍 **Infinite Settings** - Historical, future, fantasy, alien, microscopic
 - 🚀 **Fully Automated Pipeline** - Input show → Output episode
 
 ## 🏗️ Architecture & Status
+
+> ⚠️ **Status-honesty note.** This project is ~35% complete, and several animation and
+> creative subsystems listed below are **experimental placeholders — not implemented**,
+> despite nearby ✅ marks. Not implemented yet: animation transitions (`wipe`/`dissolve`)
+> and camera moves (`pan`/`zoom`/`track`); stage-direction physical-comedy choreography and
+> AI camera suggestions; dialogue voice-consistency validation; the database cache tier; and
+> generic / Freesound / FMA asset scraping. See `CLAUDE.md` → "Experimental / Not Yet
+> Implemented Subsystems" for the exact source sites.
 
 ### Phase 1: Foundation ✅ (100% Complete)
 - ✅ Project structure
@@ -67,7 +75,7 @@ Same heart. Same laughs. Completely new adventures.
 ### Phase 4: Script Generation 🔄 (98% Complete)
 
 **Completed in Sprint 1-2:**
-- ✅ Advanced Multi-tier Caching
+- ✅ Advanced Multi-tier Caching _(⚠️ memory + Redis tiers only; database tier is an experimental no-op)_
 - ✅ Memory Management System
   - Object pooling (>80% reuse rate)
   - Adaptive GC optimization

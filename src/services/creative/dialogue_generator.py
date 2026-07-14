@@ -409,13 +409,12 @@ Make it funny, natural, and true to the characters!
     ) -> Tuple[bool, float, List[str]]:
         """
         Check if dialogue matches character voice.
-        
+
+        EXPERIMENTAL — not implemented. Sophisticated voice matching was never
+        built; this method previously FAKED success by always returning
+        ``(True, 0.8, [])`` regardless of input. It has no callers in the repo.
+
         Returns:
-            (is_consistent, confidence_score, issues)
+            Never returns — always raises ``NotImplementedError``.
         """
-        if character not in self.voice_profiles:
-            return (True, 0.5, ["No voice profile available"])
-        
-        # TODO: Implement sophisticated voice matching
-        # For now, return basic validation
-        return (True, 0.8, [])
+        raise NotImplementedError("experimental — not implemented")

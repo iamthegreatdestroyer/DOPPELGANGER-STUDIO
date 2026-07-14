@@ -435,7 +435,12 @@ class AdvancedCacheSystem:
             return 0
     
     async def _get_from_database(self, key: str) -> Optional[Any]:
-        """Get value from database cache."""
+        """Get value from database cache.
+
+        EXPERIMENTAL — not implemented. The database cache tier is a no-op
+        placeholder that always reports a miss (returns ``None``); no DB query
+        is performed. The memory + Redis tiers are the working tiers.
+        """
         if not self._db_manager:
             return None
         
@@ -448,7 +453,11 @@ class AdvancedCacheSystem:
             return None
     
     async def _set_in_database(self, key: str, value: Any, ttl: Optional[int]):
-        """Set value in database cache."""
+        """Set value in database cache.
+
+        EXPERIMENTAL — not implemented. No-op placeholder: nothing is written to
+        a database. The memory + Redis tiers are the working tiers.
+        """
         if not self._db_manager:
             return
         
@@ -460,7 +469,11 @@ class AdvancedCacheSystem:
             logger.error(f"Database set error: {e}")
     
     async def _delete_from_database(self, key: str):
-        """Delete value from database cache."""
+        """Delete value from database cache.
+
+        EXPERIMENTAL — not implemented. No-op placeholder: nothing is deleted
+        from a database. The memory + Redis tiers are the working tiers.
+        """
         if not self._db_manager:
             return
         

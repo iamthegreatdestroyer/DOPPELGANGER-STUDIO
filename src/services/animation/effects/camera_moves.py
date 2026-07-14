@@ -14,18 +14,27 @@ except ImportError:
 
 
 def pan_camera(target: Tuple[float, float], duration: float = 2.0) -> Animation:
-    """Pan camera to target."""
-    # Implementation placeholder
-    return Wait(duration)
+    """Pan camera to target.
+
+    EXPERIMENTAL — not implemented. Animation placeholder; camera panning has not
+    been built. This previously returned a silent no-op ``Wait(duration)``.
+    """
+    raise NotImplementedError("experimental — not implemented")
 
 
 def zoom_camera(factor: float, duration: float = 1.0) -> Animation:
-    """Zoom camera."""
-    # Implementation placeholder
-    return Wait(duration)
+    """Zoom camera.
+
+    EXPERIMENTAL — not implemented. Animation placeholder; camera zoom has not
+    been built. This previously returned a silent no-op ``Wait(duration)``.
+    """
+    raise NotImplementedError("experimental — not implemented")
 
 
 def track_character(character, duration: float = 2.0) -> Animation:
-    """Track character movement."""
-    # Implementation placeholder
-    return Wait(duration)
+    """Track character movement.
+
+    EXPERIMENTAL — not implemented. Animation placeholder; character tracking has
+    not been built. This previously returned a silent no-op ``Wait(duration)``.
+    """
+    raise NotImplementedError("experimental — not implemented")

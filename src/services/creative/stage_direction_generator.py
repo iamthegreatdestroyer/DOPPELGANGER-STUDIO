@@ -274,6 +274,11 @@ class StageDirectionGenerator:
     ) -> PhysicalComedySequence:
         """
         Choreograph physical comedy moment.
+
+        EXPERIMENTAL — not fully implemented (see the "EXPERIMENTAL STUB" marker in
+        the body): the parsed model response is NOT mapped into structured beats;
+        setup/escalation are returned empty and climax/resolution are hardcoded
+        placeholders. Do not treat the returned sequence as real choreography.
         
         Example: "ring light falls" →
         - Setup: Luna adjusts ring light precariously
@@ -331,6 +336,10 @@ Make it visual, funny, and clear!
             data = json.loads(response)
             
             # Create sequence (simplified version)
+            # EXPERIMENTAL STUB — not implemented: the parsed ``data`` is ignored
+            # except for ``beat_name``; setup/escalation are empty and the
+            # climax/resolution are hardcoded placeholders, so this is NOT real
+            # choreography.
             # TODO: Full implementation
             return PhysicalComedySequence(
                 beat_name=data.get('beat_name', comedic_beat),
@@ -382,7 +391,11 @@ Make it visual, funny, and clear!
         action_type: str,
         emotional_beat: str
     ) -> CameraSuggestion:
-        """Suggest camera movement/framing for moment."""
+        """Suggest camera movement/framing for moment.
+
+        EXPERIMENTAL — basic rule-based placeholder heuristic, not the planned
+        AI-powered version. Returns real but simplistic suggestions.
+        """
         # Simple rule-based suggestions
         # TODO: Make AI-powered for better suggestions
         

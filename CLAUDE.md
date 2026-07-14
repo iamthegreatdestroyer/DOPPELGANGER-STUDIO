@@ -8,6 +8,30 @@
 - **Current completion:** ~35% (substantial code scaffolding present under `src/services/`; end-to-end functionality unverified — see Done Criteria)
 - **Mission:** AI-powered TV show reimagining — extract "energy and vibe" from classic shows using Claude AI, rebuild them in new dimensions/timelines/realities as animated content
 
+## ⚠️ Experimental / Not Yet Implemented Subsystems
+
+The animation and creative subsystems below are **EXPERIMENTAL placeholders** — scaffolding
+only, **not implemented**. Do NOT read them as complete (consistent with the ~35% completion
+noted above). Each site is marked inline in source (raises `NotImplementedError`, or returns
+empty/no-op with an `EXPERIMENTAL` docstring note):
+
+- **Animation effects** — `src/services/animation/effects/`
+  - `transitions.py`: `wipe_transition`, `dissolve_transition` raise `NotImplementedError`
+    (`fade_transition` IS implemented via Manim).
+  - `camera_moves.py`: `pan_camera`, `zoom_camera`, `track_character` raise `NotImplementedError`.
+- **Creative generators** — `src/services/creative/`
+  - `stage_direction_generator.py`: `_generate_physical_comedy_sequence` returns a generic
+    placeholder sequence (model output is not mapped into beats); `_suggest_camera_work` is a
+    basic rule-based heuristic, not the planned AI version.
+  - `dialogue_generator.py`: `_validate_voice_consistency` raises `NotImplementedError` (it was
+    faking a positive result and has no callers). Note: `_calculate_voice_consistency` does not exist.
+  - `advanced_cache.py`: the database tier (`_get_from_database` / `_set_in_database` /
+    `_delete_from_database`) is a no-op placeholder; only the memory + Redis tiers are real.
+- **Asset scraping** — `src/services/asset_manager/intelligent_scraper.py`
+  - `VideoScraper._fetch_generic`, `AudioScraper._fetch_generic`, `AudioScraper._fetch_freesound`,
+    `AudioScraper._fetch_fma` return empty lists (scraping / API access not implemented; the
+    Pexels / Pixabay / NASA video fetchers are real).
+
 ## Sprint Plan
 
 ### Sprint 1 — Audit & Build (Day 1)

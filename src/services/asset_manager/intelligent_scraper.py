@@ -1114,6 +1114,8 @@ class VideoScraper:
     ) -> List[Asset]:
         """
         Generic web scraping for sources without APIs.
+
+        EXPERIMENTAL — not implemented. Returns an empty list; no scraping occurs.
         
         This is a placeholder that would need BeautifulSoup/Scrapy
         for actual HTML parsing per source.
@@ -1162,7 +1164,10 @@ class AudioScraper:
         category: str,
         max_items: int
     ) -> List[Asset]:
-        """Fetch sound effects from Freesound API."""
+        """Fetch sound effects from Freesound API.
+
+        EXPERIMENTAL — not implemented. Returns an empty list; no API call is made.
+        """
         # Freesound requires API key and OAuth
         # Placeholder for now
         logger.info(f"Freesound scraping requires API implementation")
@@ -1174,7 +1179,10 @@ class AudioScraper:
         category: str,
         max_items: int
     ) -> List[Asset]:
-        """Fetch music from Free Music Archive."""
+        """Fetch music from Free Music Archive.
+
+        EXPERIMENTAL — not implemented. Returns an empty list; no API call is made.
+        """
         # FMA has an API but requires authentication
         # Placeholder for now
         logger.info(f"FMA scraping requires API implementation")
@@ -1188,6 +1196,8 @@ class AudioScraper:
     ) -> List[Asset]:
         """
         Generic audio scraping.
+
+        EXPERIMENTAL — not implemented. Returns an empty list; no scraping occurs.
         
         Would scrape HTML/RSS feeds for MP3 downloads.
         """

@@ -30,12 +30,19 @@ def fade_transition(duration: float = 1.0) -> Animation:
 
 
 def wipe_transition(direction: str = "left", duration: float = 1.0) -> Animation:
-    """Wipe transition."""
-    # Implementation placeholder
-    return Wait(duration)
+    """Wipe transition.
+
+    EXPERIMENTAL — not implemented. Animation placeholder; the wipe effect has
+    not been built. This previously returned a silent no-op ``Wait(duration)``
+    that masqueraded as a real transition.
+    """
+    raise NotImplementedError("experimental — not implemented")
 
 
 def dissolve_transition(duration: float = 1.5) -> Animation:
-    """Dissolve transition."""
-    # Implementation placeholder  
-    return Wait(duration)
+    """Dissolve transition.
+
+    EXPERIMENTAL — not implemented. Animation placeholder; the dissolve effect
+    has not been built. This previously returned a silent no-op ``Wait(duration)``.
+    """
+    raise NotImplementedError("experimental — not implemented")
