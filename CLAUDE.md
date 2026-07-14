@@ -5,7 +5,7 @@
 - **Local path:** `C:\Users\sgbil\DOPPELGANGER-STUDIO`
 - **Language:** Python 3.11+
 - **Castle Layer:** Layer 7 — Crown Services (AI Content)
-- **Current completion:** ~35%
+- **Current completion:** ~35% (substantial code scaffolding present under `src/services/`; end-to-end functionality unverified — see Done Criteria)
 - **Mission:** AI-powered TV show reimagining — extract "energy and vibe" from classic shows using Claude AI, rebuild them in new dimensions/timelines/realities as animated content
 
 ## Sprint Plan
@@ -53,9 +53,9 @@ git tag v0.1.0 && git push origin v0.1.0
 
 ## Done Criteria
 - [x] `pip install` succeeds
-- [x] `pytest tests/` passes
-- [x] ShowAnalyzer extracts humor patterns and vibe from sample text
-- [x] ContentGenerator produces a reimagined script excerpt
+- [ ] `pytest tests/` passes (not verified in this pass)
+- [ ] ShowAnalyzer extracts humor patterns and vibe from sample text (code present in `src/services/creative/show_analyzer.py`; end-to-end extraction unverified)
+- [ ] ContentGenerator produces a reimagined script excerpt (generators present in `src/services/creative/`; end-to-end output unverified)
 - [x] CLI works end-to-end
 - [x] `v0.1.0` tag pushed
 
