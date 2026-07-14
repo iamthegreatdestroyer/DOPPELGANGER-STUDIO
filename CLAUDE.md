@@ -41,7 +41,7 @@ Test: analyze("I Love Lucy", ["pilot episode transcript"]) → returns non-empty
     - setting_details: str  # new dimensional/timeline details
 
 Test: generate(lucy_profile, "2157 space colony") → produces coherent script excerpt.
-CLI: python main.py generate --show "I Love Lucy" --setting "space colony" --output ./output/
+CLI (PLANNED — not implemented; no main.py/__main__.py or [project.scripts] entry point exists): python main.py generate --show "I Love Lucy" --setting "space colony" --output ./output/
 ```
 
 ### Sprint 4 — Tests + Tag (Day 3)
@@ -56,7 +56,7 @@ git tag v0.1.0 && git push origin v0.1.0
 - [ ] `pytest tests/` passes (not verified in this pass)
 - [ ] ShowAnalyzer extracts humor patterns and vibe from sample text (code present in `src/services/creative/show_analyzer.py`; end-to-end extraction unverified)
 - [ ] ContentGenerator produces a reimagined script excerpt (generators present in `src/services/creative/`; end-to-end output unverified)
-- [x] CLI works end-to-end
+- [ ] CLI works end-to-end (no `main.py`/`__main__.py` and no `[project.scripts]` entry point exists)
 - [x] `v0.1.0` tag pushed
 
 ## Completion Signal
