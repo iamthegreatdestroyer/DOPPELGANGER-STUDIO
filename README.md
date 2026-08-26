@@ -158,7 +158,6 @@ pytest tests/integration/test_performance_pipeline.py
 
 ## 🔒 Legal & IP
 
-- **Patent Pending:** AI-driven multi-dimensional storytelling system
 - **Trademark:** DOPPELGANGER STUDIO™
 - **License:** Dual (AGPLv3 for personal, commercial licensing available)
 - **Content:** All generated content is original and transformative
@@ -178,4 +177,4 @@ For commercial licensing inquiries: sgbilod@gmail.com
 **Version:** 0.2.0-alpha  
 **Last Updated:** October 12, 2025
 
-© 2025 All Rights Reserved. Patent Pending.
+© 2025 Stephen Bilodeau. All Rights Reserved.
