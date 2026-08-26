@@ -1,7 +1,7 @@
 """
 AI Services Package - Character and narrative analysis engines.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025 Stephen Bilodeau. All Rights Reserved.
 
 NOTE (2026-07-02): this file was corrupted (literal \n escapes instead of real
 newlines — a SyntaxError since whenever it was written). Rewritten. The Claude
