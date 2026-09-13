@@ -371,5 +371,5 @@ What would you like to do?
 
 **END OF PHASE 7**
 
-*Copyright (c) 2025. All Rights Reserved. Patent Pending.*  
+*Copyright (c) 2025. All Rights Reserved.*  
 *DOPPELGANGER STUDIO - Professional TV Parody Creation Platform*

@@ -1193,6 +1193,6 @@ Once Phase 4 is complete, DOPPELGANGER STUDIO will have:
 
 ---
 
-**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved. Patent Pending.**
+**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved.**
 
 _Let's create some magic! ✨🎬_

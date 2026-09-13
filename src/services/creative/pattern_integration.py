@@ -5,7 +5,7 @@ Provides seamless integration between the humor pattern library and the
 narrative analyzer and transformation engine, enabling automatic pattern
 detection, matching, and transformation suggestions.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Set, Tuple

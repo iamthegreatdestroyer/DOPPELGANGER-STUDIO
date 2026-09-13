@@ -596,5 +596,5 @@ ffmpeg -i input.mp4 -c:v libx264 -preset medium -b:v 5M -c:a aac -b:a 192k outpu
 
 **END OF PHASE 8 DIRECTIVE**
 
-*Copyright (c) 2025. All Rights Reserved. Patent Pending.*
+*Copyright (c) 2025. All Rights Reserved.*
 *DOPPELGANGER STUDIO - Professional TV Parody Creation Platform*

@@ -4,7 +4,7 @@ Base AI Client - Abstract interface for AI service providers.
 Provides common interface for Claude, GPT-4, and future AI models with
 token tracking, cost calculation, and retry logic.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from abc import ABC, abstractmethod

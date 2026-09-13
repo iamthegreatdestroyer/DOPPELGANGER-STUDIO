@@ -402,4 +402,4 @@ asyncio.run(export_episode())
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**

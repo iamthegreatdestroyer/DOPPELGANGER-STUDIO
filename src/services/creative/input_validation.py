@@ -4,7 +4,7 @@ Input Validation & Sanitization - Comprehensive input validation for all compone
 Provides validation utilities for show data, analysis inputs, script generation
 parameters, and API inputs to prevent errors and ensure data quality.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Any, Set

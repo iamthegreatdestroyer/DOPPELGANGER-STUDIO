@@ -330,5 +330,5 @@ for asset in assets:
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**  
+**Copyright (c) 2025. All Rights Reserved.**  
 **DOPPELGANGER STUDIO™ - AI-Powered Content Transformation**

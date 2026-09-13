@@ -6,7 +6,7 @@ Key components:
 - WikipediaShowData: Data structure for show information.
 - WikipediaResearchScraper: Class for scraping Wikipedia data asynchronously.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional

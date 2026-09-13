@@ -4,7 +4,7 @@ PostgreSQL Research Cache - Cache research data to reduce API calls.
 Provides efficient caching layer for Wikipedia, TMDB, and IMDB research data
 with automatic expiration and cleanup.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, Dict, Any

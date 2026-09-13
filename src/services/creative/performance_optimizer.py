@@ -4,7 +4,7 @@ Performance Optimizer - Advanced caching and performance enhancements.
 Provides intelligent caching strategies, batch processing optimization,
 and performance monitoring for script generation pipeline.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import logging

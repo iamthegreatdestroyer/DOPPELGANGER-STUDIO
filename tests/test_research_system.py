@@ -3,7 +3,7 @@ Tests for Research System components.
 
 Tests Wikipedia scraper, TMDB scraper, and Research Orchestrator.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

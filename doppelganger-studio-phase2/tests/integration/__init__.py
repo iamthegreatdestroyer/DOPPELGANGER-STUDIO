@@ -11,7 +11,7 @@ Key components:
 - WikipediaShowData: Dataclass for structured show data.
 - WikipediaResearchScraper: Class for scraping Wikipedia.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional

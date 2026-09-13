@@ -4,7 +4,7 @@ Character Visual Model - Visual representation data for animated characters.
 Defines the visual properties, expressions, and animation states
 for characters in the animation system.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Tuple, Optional

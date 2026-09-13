@@ -3,7 +3,7 @@ Sound Effects Library Management System.
 
 Manages sound effects with categorization, search, and metadata.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Set

@@ -4,7 +4,7 @@ AI Response Validators - Pydantic schemas for structured AI outputs.
 Validates that Claude and GPT-4 return properly structured JSON responses
 for character analysis, narrative analysis, and transformations.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Dict, Optional

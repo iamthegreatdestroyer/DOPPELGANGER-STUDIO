@@ -3,7 +3,7 @@ Unit tests for AI Response Validators.
 
 Tests Pydantic schema validation for AI-generated JSON responses.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

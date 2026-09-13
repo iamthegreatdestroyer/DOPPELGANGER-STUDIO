@@ -6,7 +6,7 @@ Provides unified interface for multiple TTS providers:
 - Google Cloud TTS (fallback)
 - pyttsx3 (offline)
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, Dict, Any
@@ -176,4 +176,4 @@ class TTSInvalidVoiceError(TTSEngineError):
     pass
 
 
-# Copyright (c) 2025. All Rights Reserved. Patent Pending.
+# Copyright (c) 2025. All Rights Reserved.

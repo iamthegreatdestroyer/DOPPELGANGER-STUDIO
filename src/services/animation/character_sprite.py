@@ -4,7 +4,7 @@ Character Sprite System - Visual character management for animations.
 Handles character loading, positioning, expressions, and animation states
 for Manim-based rendering.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Tuple, Optional, Any

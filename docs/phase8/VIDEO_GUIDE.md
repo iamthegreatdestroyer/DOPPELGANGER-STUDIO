@@ -82,5 +82,5 @@ print(f"Episode complete: {result.duration_seconds:.1f}s")
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**
 **DOPPELGANGER STUDIO - Professional TV Parody Creation Platform**

@@ -1,7 +1,7 @@
 """
 Voice Profile Model - Character voice configuration.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, Any, Optional

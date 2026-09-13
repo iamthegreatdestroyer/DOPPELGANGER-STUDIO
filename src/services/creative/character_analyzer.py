@@ -4,7 +4,7 @@ Character Analyzer - AI-powered character analysis and trait extraction.
 Analyzes TV show characters to extract personality traits, motivations,
 relationships, and behavioral patterns.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

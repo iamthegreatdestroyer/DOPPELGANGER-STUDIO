@@ -334,4 +334,4 @@ The foundation is solid. Every component has been architected with:
 
 ---
 
-© 2025 All Rights Reserved. Patent Pending.
+© 2025 All Rights Reserved.

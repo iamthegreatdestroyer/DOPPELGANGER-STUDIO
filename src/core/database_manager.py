@@ -3,7 +3,7 @@ Database Manager - Unified database access for PostgreSQL, MongoDB, and Redis.
 
 Manages connections and provides simple interfaces for all databases.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, Dict, Any

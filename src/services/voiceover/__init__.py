@@ -7,7 +7,7 @@ Provides components for:
 - Audio generation and processing
 - Video synchronization
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from .tts_engine import TTSEngine, TTSResult

@@ -3,7 +3,7 @@ Video Compositor - Combine Animation and Audio.
 
 Compose final video from animation frames and audio tracks using FFmpeg.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, Optional, Tuple

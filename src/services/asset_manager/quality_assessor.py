@@ -9,7 +9,7 @@ This module implements comprehensive quality assessment for video and audio:
 5. Batch processing for efficiency
 6. Caching for performance
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Tuple

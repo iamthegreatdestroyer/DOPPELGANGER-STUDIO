@@ -331,4 +331,4 @@
 
 **The creative brain of DOPPELGANGER STUDIO is taking shape! 🧠✨**
 
-© 2025 DOPPELGANGER STUDIO™. All Rights Reserved. Patent Pending.
+© 2025 DOPPELGANGER STUDIO™. All Rights Reserved.

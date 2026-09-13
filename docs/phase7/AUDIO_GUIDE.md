@@ -424,5 +424,5 @@ See inline documentation in source files:
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**
 **DOPPELGANGER STUDIO - Professional TV Parody Creation Platform**

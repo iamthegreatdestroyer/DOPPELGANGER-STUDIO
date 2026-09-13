@@ -8,7 +8,7 @@ This module implements semantic tagging using OpenAI's CLIP model:
 4. Supports batch processing for efficiency
 5. Caches embeddings for reuse
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Dict, Optional, Tuple

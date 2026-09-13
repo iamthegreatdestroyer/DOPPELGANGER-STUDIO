@@ -4,7 +4,7 @@ Timeline Manager - Coordinate animation timing and sequencing.
 Manages the timeline of animations, ensuring proper synchronization
 of character movements, dialogue, effects, and transitions.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Dict, Tuple, Optional, Callable, Any
@@ -157,4 +157,4 @@ class Timeline:
         logger.debug("Timeline cleared")
 
 
-# Copyright (c) 2025. All Rights Reserved. Patent Pending.
+# Copyright (c) 2025. All Rights Reserved.

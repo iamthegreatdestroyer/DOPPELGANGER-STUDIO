@@ -366,4 +366,4 @@ class EpisodeGenerator:
 
 ---
 
-**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved. Patent Pending.**
+**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved.**

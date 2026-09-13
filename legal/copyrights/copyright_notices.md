@@ -128,7 +128,7 @@ DOPPELGANGER STUDIO is proprietary software with dual licensing:
 - AGPLv3 for personal use
 - Commercial license available
 
-Patent Pending: AI-Driven Content Transformation System
+AI-Driven Content Transformation System
 
 Unauthorized copying, modification, or distribution is prohibited.
 """

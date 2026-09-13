@@ -3,7 +3,7 @@ AI Orchestrator - Manages multiple AI providers with intelligent fallback.
 
 Coordinates Claude and GPT-4, automatically falling back on failures.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, Dict

@@ -4,7 +4,7 @@ Scene Renderer - Compose and render complete animated scenes.
 Handles scene composition, character placement, dialogue, backgrounds,
 and camera control for episode generation.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Tuple, Optional, Any
@@ -193,4 +193,4 @@ class SceneRenderer:
             speaker.set_state(AnimationState.IDLE)
 
 
-# Copyright (c) 2025. All Rights Reserved. Patent Pending.
+# Copyright (c) 2025. All Rights Reserved.

@@ -3,7 +3,7 @@ Unit tests for IMDB Research Scraper.
 
 Tests ethical scraping practices, rate limiting, caching, and data extraction.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

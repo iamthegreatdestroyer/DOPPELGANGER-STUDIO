@@ -3,7 +3,7 @@ ElevenLabs TTS Client - Integration with ElevenLabs API.
 
 Provides ultra-realistic text-to-speech using ElevenLabs' AI voices.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, Any, Optional
@@ -384,4 +384,4 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-# Copyright (c) 2025. All Rights Reserved. Patent Pending.
+# Copyright (c) 2025. All Rights Reserved.

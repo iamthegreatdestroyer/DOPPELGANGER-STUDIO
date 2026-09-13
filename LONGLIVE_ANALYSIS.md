@@ -154,7 +154,6 @@
 **Your IP Strategy** (per INSTRUCTIONS.md):
 
 - Dual licensing (AGPLv3 personal / Commercial available)
-- Patent pending on AI-driven transformation
 - Full commercial exploitation rights desired
 
 **Issue**: LongLive's non-commercial license **blocks commercial use** of your project if integrated.

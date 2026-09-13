@@ -4,7 +4,7 @@ Intelligent Music Selection System.
 Selects appropriate background music based on scene context,
 mood, energy level, and duration requirements.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

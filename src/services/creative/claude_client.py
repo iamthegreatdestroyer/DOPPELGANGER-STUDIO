@@ -4,7 +4,7 @@ Claude AI Client - Primary LLM for creative intelligence.
 Provides Claude Sonnet 4.5 integration with intelligent prompt optimization,
 response caching, and error handling.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Any

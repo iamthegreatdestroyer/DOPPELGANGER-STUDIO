@@ -466,5 +466,5 @@ scipy>=1.10.0        # Signal processing
 
 **END OF PHASE 7 DIRECTIVE**
 
-*Copyright (c) 2025. All Rights Reserved. Patent Pending.*
+*Copyright (c) 2025. All Rights Reserved.*
 *DOPPELGANGER STUDIO - Professional TV Parody Creation Platform*

@@ -4,7 +4,7 @@ IMDB Research Scraper - Ethical web scraping for TV show data.
 Respects robots.txt, implements aggressive rate limiting, and caches
 extensively to minimize impact on IMDB servers.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

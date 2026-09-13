@@ -4,7 +4,7 @@ Enhanced Error Recovery - Comprehensive error handling and recovery strategies.
 Provides intelligent error recovery, graceful degradation, and fallback
 mechanisms for AI API failures, validation errors, and processing issues.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Callable, Any, TypeVar, Generic

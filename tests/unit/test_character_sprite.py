@@ -1,7 +1,7 @@
 """
 Unit tests for character sprite system.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

@@ -3,7 +3,7 @@ Integration test for complete research flow.
 
 Tests the full research orchestrator with all three sources.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

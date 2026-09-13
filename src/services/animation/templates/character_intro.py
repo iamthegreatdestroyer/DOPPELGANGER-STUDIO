@@ -1,7 +1,7 @@
 """
 Character Introduction Template.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 try:

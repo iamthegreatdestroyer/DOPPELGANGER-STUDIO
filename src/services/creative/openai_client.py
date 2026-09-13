@@ -17,7 +17,7 @@ Default model: qwythos-9b (the custom Claude-Mythos creative-writing merge
 served by the local Ollama), override via DOPPELGANGER_LOCAL_MODEL.
 Gateway URL: RYZANSTEIN_URL (default http://localhost:8000).
 
-Copyright (c) 2025-2026. All Rights Reserved. Patent Pending.
+Copyright (c) 2025-2026. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Any

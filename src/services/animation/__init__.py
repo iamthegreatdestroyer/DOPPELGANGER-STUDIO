@@ -7,7 +7,7 @@ Provides components for:
 - Visual effects
 - Video export
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from .manim_wrapper import ManimWrapper, RenderQuality

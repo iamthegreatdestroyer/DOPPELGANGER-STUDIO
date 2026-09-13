@@ -1,7 +1,7 @@
 """
 Audio Pipeline Integration.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from src.services.audio.integration.pipeline import AudioPipeline

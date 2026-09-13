@@ -4,7 +4,7 @@ Memory Optimization Manager - Adaptive memory management and resource pooling.
 Provides intelligent memory management for the script generation pipeline,
 including object pooling, garbage collection optimization, and memory monitoring.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Any, TypeVar, Generic, Callable

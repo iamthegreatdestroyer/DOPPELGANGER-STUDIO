@@ -4,7 +4,7 @@ Manim Wrapper - Interface to Manim animation engine.
 Provides simplified API for creating and rendering animations from script data.
 Handles rendering configuration, quality presets, and output management.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, Tuple, Dict, List, Any

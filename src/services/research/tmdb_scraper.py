@@ -4,7 +4,7 @@ TMDB Research Scraper - Extract TV show data from The Movie Database.
 Provides structured data including cast, crew, episode information,
 ratings, and production details via official TMDB API.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, List, Dict

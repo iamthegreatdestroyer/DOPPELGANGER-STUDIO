@@ -1,7 +1,7 @@
 """
 Animation Templates - Reusable scene templates.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from .sitcom_template import SitcomScene

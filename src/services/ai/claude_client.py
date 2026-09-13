@@ -4,7 +4,7 @@ Claude Sonnet 4.5 Client - Primary AI engine for analysis and generation.
 Integrates with Anthropic's Claude API for character analysis, narrative
 recognition, and transformation rule generation.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, List, Any

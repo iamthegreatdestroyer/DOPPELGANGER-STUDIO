@@ -3,7 +3,7 @@ Research Services Package - TV show data collection and caching.
 
 Provides scrapers for Wikipedia, TMDB, and IMDB with PostgreSQL caching.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from src.services.research.wikipedia_scraper import WikipediaResearchScraper

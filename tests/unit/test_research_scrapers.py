@@ -3,7 +3,7 @@ Unit Tests for Research Scrapers.
 
 Tests Wikipedia, TMDB scrapers with mocked API responses.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

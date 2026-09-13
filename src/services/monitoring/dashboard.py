@@ -4,7 +4,7 @@ Production Monitoring Dashboard - Real-time performance visualization.
 Provides web-based dashboard for monitoring system performance, resource usage,
 and application health metrics.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Any

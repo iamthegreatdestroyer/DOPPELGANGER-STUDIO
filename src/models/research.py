@@ -4,7 +4,7 @@ Research Data Models - Pydantic schemas for all research data.
 Provides type-safe data models for Wikipedia, TMDB, IMDB research results
 with validation, serialization, and JSON schema export.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional, Dict, Any

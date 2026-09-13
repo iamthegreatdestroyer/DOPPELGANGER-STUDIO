@@ -4,7 +4,7 @@ Episode Script Generator - Creates episode outlines and scene structures.
 Generates episode premises, scene breakdowns, and structural outlines
 for modern TV parodies based on transformation rules.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

@@ -540,6 +540,6 @@ We've built a solid foundation:
 
 ---
 
-**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved. Patent Pending.**
+**© 2025 DOPPELGANGER STUDIO™. All Rights Reserved.**
 
 _Let's keep building! 🎬✨_

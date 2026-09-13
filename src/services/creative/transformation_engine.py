@@ -4,7 +4,7 @@ Transformation Engine - Maps classic TV elements to modern contexts.
 Generates transformation rules for adapting classic TV shows into
 contemporary parodies while preserving narrative DNA and comedic essence.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

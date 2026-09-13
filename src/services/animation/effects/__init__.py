@@ -4,7 +4,7 @@ Visual Effects Library - Reusable animation effects.
 Provides transitions, camera moves, and text effects
 for professional scene composition.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from .transitions import *

@@ -8,7 +8,7 @@ This module implements comprehensive asset storage with:
 4. Usage analytics and performance metrics
 5. Automatic cleanup of expired/unused assets
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from dataclasses import asdict

@@ -4,7 +4,7 @@ Multi-Track Audio Mixer.
 Mixes dialogue, music, sound effects, and ambience with intelligent
 ducking and level balancing.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional, Dict

@@ -31,7 +31,7 @@ Example:
     ...     data = await scraper.scrape("I Love Lucy")
     ...     print(data)
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional
@@ -151,7 +151,7 @@ class WikipediaResearchScraper:
 """
 Unit tests for the Wikipedia research scraper.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

@@ -15,7 +15,7 @@ Example:
     ...     show_data = await scraper.scrape("I Love Lucy")
     ...     print(show_data)
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional

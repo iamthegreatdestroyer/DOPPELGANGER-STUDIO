@@ -1,6 +1,6 @@
 """Resource Monitoring System - Track CPU, memory, disk, and network usage.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Callable, Any

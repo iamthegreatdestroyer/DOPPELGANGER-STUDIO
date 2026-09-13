@@ -4,7 +4,7 @@ Narrative Structure Analyzer - AI-powered analysis of TV show storytelling patte
 Identifies plot structures, recurring devices, narrative conventions, and
 pacing patterns from classic TV shows for transformation into modern parodies.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

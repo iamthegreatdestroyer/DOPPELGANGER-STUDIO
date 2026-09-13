@@ -1,7 +1,7 @@
 """
 Export Optimizer - Video Export Optimization.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, Tuple

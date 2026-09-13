@@ -3,7 +3,7 @@ Tests for AI Creative Engine components.
 
 Tests Claude client, OpenAI client, AI Orchestrator, and Character Analyzer.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

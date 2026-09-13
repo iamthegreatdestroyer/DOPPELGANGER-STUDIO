@@ -4,7 +4,7 @@ Show Analyzer - Unified orchestrator for complete TV show analysis.
 Coordinates Research, Character, Narrative, and Transformation systems
 to perform comprehensive analysis of classic TV shows.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional

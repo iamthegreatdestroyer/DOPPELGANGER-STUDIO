@@ -1,7 +1,7 @@
 """
 Audio Processor - Audio effects and processing.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from pathlib import Path

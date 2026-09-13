@@ -7,7 +7,7 @@ Tests:
 - Page variations
 - Mock Wikipedia API responses
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 import pytest
 import asyncio

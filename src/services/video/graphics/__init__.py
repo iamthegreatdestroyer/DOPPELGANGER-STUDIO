@@ -1,7 +1,7 @@
 """
 Graphics Generation - Title Cards and Credits.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from src.services.video.graphics.title_cards import TitleCardGenerator, TitleCardConfig

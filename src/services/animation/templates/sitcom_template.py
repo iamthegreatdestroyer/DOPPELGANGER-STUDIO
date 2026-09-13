@@ -1,7 +1,7 @@
 """
 Sitcom Template - 3-camera sitcom-style scenes.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 try:

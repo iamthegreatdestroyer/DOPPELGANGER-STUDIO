@@ -1,7 +1,7 @@
 """
 Video Composition - Compositor and Scene Assembly.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from src.services.video.composition.compositor import VideoCompositor, VideoComposition

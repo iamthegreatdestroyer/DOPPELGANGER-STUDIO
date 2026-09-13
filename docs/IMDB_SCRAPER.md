@@ -157,6 +157,6 @@ if not await scraper._can_fetch(url):
 
 ## License
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 
 Part of DOPPELGANGER STUDIO™ - AI-Driven Content Transformation System

@@ -468,4 +468,4 @@ The system can now automatically acquire, tag, store, and search through massive
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**

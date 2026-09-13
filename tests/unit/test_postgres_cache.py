@@ -3,7 +3,7 @@ Unit Tests for PostgreSQL Research Cache.
 
 Tests caching functionality with mocked database.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

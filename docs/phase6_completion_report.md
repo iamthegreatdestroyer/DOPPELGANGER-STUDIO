@@ -386,4 +386,4 @@ The voiceover system is **production-ready** with professional voice acting capa
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**

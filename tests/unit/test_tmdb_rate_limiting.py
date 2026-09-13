@@ -3,7 +3,7 @@ Unit tests for TMDB Rate Limiting.
 
 Tests in-memory rate limiter with 40 requests per 10 seconds limit.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import pytest

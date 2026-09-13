@@ -5,7 +5,7 @@ Provides pattern recognition, modern equivalents, and transformation guidance
 for adapting classic comedy to contemporary contexts while preserving timing
 and effectiveness.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Dict, List, Optional, Set

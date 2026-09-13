@@ -13,7 +13,7 @@ Example:
     >>> show_data = await scraper.scrape()
     >>> print(show_data.title)
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional

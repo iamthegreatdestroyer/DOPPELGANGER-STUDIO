@@ -388,4 +388,4 @@ The animation system is **production-ready** and fully integrated with previous 
 
 ---
 
-**Copyright (c) 2025. All Rights Reserved. Patent Pending.**
+**Copyright (c) 2025. All Rights Reserved.**

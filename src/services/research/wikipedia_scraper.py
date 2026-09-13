@@ -4,7 +4,7 @@ Wikipedia Research Scraper - Extract TV show data from Wikipedia.
 Provides comprehensive extraction of TV show information including plot summaries,
 character descriptions, episode guides, and cultural context using async operations.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import Optional, List, Dict

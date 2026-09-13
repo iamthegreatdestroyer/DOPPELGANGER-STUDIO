@@ -4,7 +4,7 @@ Advanced Caching System - Multi-tier caching with Redis support.
 Provides intelligent multi-tier caching strategy with memory, Redis, and
 database layers for optimal performance in script generation pipeline.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 import logging

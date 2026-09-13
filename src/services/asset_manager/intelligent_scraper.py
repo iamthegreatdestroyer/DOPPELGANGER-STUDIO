@@ -9,7 +9,7 @@ This module implements a sophisticated asset acquisition system that:
 5. Tracks usage analytics to optimize future acquisitions
 6. Automatically updates weekly with new content
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from dataclasses import dataclass, field

@@ -4,7 +4,7 @@ Video Exporter - Compile scenes into final videos.
 Handles multi-scene compilation, quality settings, progress tracking,
 and metadata embedding.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 from typing import List, Optional, Callable, Dict, Any
@@ -160,4 +160,4 @@ class VideoExporter:
         return errors
 
 
-# Copyright (c) 2025. All Rights Reserved. Patent Pending.
+# Copyright (c) 2025. All Rights Reserved.

@@ -4,7 +4,7 @@ AI Creative Service - Core intelligence for show transformation.
 This service provides AI-powered creative capabilities including character
 analysis, narrative transformation, and humor pattern recognition.
 
-Copyright (c) 2025. All Rights Reserved. Patent Pending.
+Copyright (c) 2025. All Rights Reserved.
 """
 
 # Claude import guarded (2026-07-02): the anthropic SDK is optional — without
